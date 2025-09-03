@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Users Online</title></head>
+  <body>
+    <h1>Connected Users: <span id="count">0</span></h1>
+    <ul id="userList"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      // don't call socket.emit("register", "oscillator")
+
+      socket.on("usersUpdate", (users) => {
+        document.getElementById("count").innerText = users.length;
+
+        const userList = document.getElementById("userList");
+        userList.innerHTML = "";
+
+        users.forEach((user) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>User ID:</strong> ${user.id}<br>
+                          <strong>Frequency:</strong> ${user.frequency} Hz`;
+          userList.appendChild(li);
+        });
+      });
+    </script>
+  </body>
+</html>
