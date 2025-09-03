@@ -25,7 +25,6 @@ function initAudio() {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (AudioContext) {
             context = new AudioContext();
-            console.log("Audio context created, state:", context.state);
         } else {
             alert("Sorry, but the Web Audio API is not supported by your browser.");
             return false;

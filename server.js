@@ -49,15 +49,16 @@ function updateClientListOutlet() {
     const userData = Object.values(oscUsers).map(user => ({
         id: user.id,
         frequency: user.frequency || 440,
-        amplitude: user.amplitude || 0.5
+        amplitude: user.amplitude || 0.5,
+        attackTime: user.attackTime || 0.1,
+        decayTime: user.decayTime || 0.1,
+        sustainLevel: user.sustainLevel || 0.5,
+        frequencySmoothing: user.frequencySmoothing || 0.1,
+        amplitudeSmoothing: user.amplitudeSmoothing || 0.1,
+        adsOn: user.adsOn || false
     }));
     
     io.emit("usersUpdate", userData);
-    
-    console.log(`Client list updated: ${clientCount} OSC clients`, clientList);
-    console.log("Sending to Max - clientCount:", clientCount);
-    console.log("Sending to Max - clientList:", clientList);
-    console.log("Sending to web clients - userData:", userData);
 }
 
 // ===== Max API Handlers =====
@@ -113,12 +114,6 @@ maxApi.addHandler("parameters", (...params) => {
     updateClientListOutlet();
 });
 
-// Test handler for Max communication
-maxApi.addHandler("ping", () => {
-    console.log("PING received in Node.js!");
-    maxApi.outlet("pong");
-    return "ping received";
-});
 
 // Handler to manually request client list update
 maxApi.addHandler("refreshClientList", () => {
@@ -131,12 +126,108 @@ maxApi.addHandler("getClients", () => {
     return Object.keys(oscUsers);
 });
 
-// Test handler to verify Max communication
-maxApi.addHandler("test", () => {
-    console.log("Test handler called from Max");
-    maxApi.outlet("test", "Max communication working!");
-    maxApi.outlet(999); // Send test number
-    return "test response";
+// Get users as object
+maxApi.addHandler("getUsersObject", () => {
+    const usersObject = {};
+    Object.entries(oscUsers).forEach(([socketId, userData], index) => {
+        const userNumber = index + 1; // Start from 1
+        usersObject[userNumber] = {
+            socketId: socketId, // Keep original socket ID for reference
+            id: userData.id,
+            frequency: userData.frequency || 440,
+            amplitude: userData.amplitude || 0.5,
+            attackTime: userData.attackTime || 0.1,
+            decayTime: userData.decayTime || 0.1,
+            sustainLevel: userData.sustainLevel || 0.5,
+            frequencySmoothing: userData.frequencySmoothing || 0.1,
+            amplitudeSmoothing: userData.amplitudeSmoothing || 0.1,
+            adsOn: userData.adsOn || false
+        };
+    });
+    
+    maxApi.outlet("usersObject", usersObject);
+    return usersObject;
+});
+
+// Get specific user data by number (1, 2, 3...)
+maxApi.addHandler("getUserByNumber", (userNumber) => {
+    const socketIds = Object.keys(oscUsers);
+    const index = userNumber - 1; // Convert to 0-based index
+    
+    if (index >= 0 && index < socketIds.length) {
+        const socketId = socketIds[index];
+        const userData = {
+            socketId: socketId,
+            id: oscUsers[socketId].id,
+            frequency: oscUsers[socketId].frequency || 440,
+            amplitude: oscUsers[socketId].amplitude || 0.5,
+            attackTime: oscUsers[socketId].attackTime || 0.1,
+            decayTime: oscUsers[socketId].decayTime || 0.1,
+            sustainLevel: oscUsers[socketId].sustainLevel || 0.5,
+            frequencySmoothing: oscUsers[socketId].frequencySmoothing || 0.1,
+            amplitudeSmoothing: oscUsers[socketId].amplitudeSmoothing || 0.1,
+            adsOn: oscUsers[socketId].adsOn || false
+        };
+        
+        maxApi.outlet("userData", userData);
+        maxApi.outlet("userFound", userNumber);
+        return userData;
+    } else {
+        maxApi.outlet("userNotFound", userNumber);
+        return null;
+    }
+});
+
+// Send parameter to specific user by number
+maxApi.addHandler("setParameterByNumber", (userNumber, param, value) => {
+    const socketIds = Object.keys(oscUsers);
+    const index = userNumber - 1; // Convert to 0-based index
+    
+    if (index >= 0 && index < socketIds.length) {
+        const socketId = socketIds[index];
+        
+        // Update user data
+        oscUsers[socketId][param] = value;
+        users[socketId][param] = value;
+        
+        // Emit to specific client
+        io.to(socketId).emit(param, value);
+        
+        // Update dashboard
+        updateClientListOutlet();
+        
+        console.log(`Parameter "${param}" set to ${value} for user ${userNumber} (${socketId})`);
+        maxApi.outlet("parameterSet", { userNumber, param, value });
+        return true;
+    } else {
+        console.log(`User ${userNumber} not found`);
+        maxApi.outlet("userNotFound", userNumber);
+        return false;
+    }
+});
+
+// Get specific user data
+maxApi.addHandler("getUser", (socketId) => {
+    if (oscUsers[socketId]) {
+        const userData = {
+            id: oscUsers[socketId].id,
+            frequency: oscUsers[socketId].frequency || 440,
+            amplitude: oscUsers[socketId].amplitude || 0.5,
+            attackTime: oscUsers[socketId].attackTime || 0.1,
+            decayTime: oscUsers[socketId].decayTime || 0.1,
+            sustainLevel: oscUsers[socketId].sustainLevel || 0.5,
+            frequencySmoothing: oscUsers[socketId].frequencySmoothing || 0.1,
+            amplitudeSmoothing: oscUsers[socketId].amplitudeSmoothing || 0.1,
+            adsOn: oscUsers[socketId].adsOn || false
+        };
+        
+        maxApi.outlet("userData", userData);
+        maxApi.outlet("userFound", socketId);
+        return userData;
+    } else {
+        maxApi.outlet("userNotFound", socketId);
+        return null;
+    }
 });
 
 // Debug handler to check current state
@@ -200,16 +291,13 @@ app.get("/osc.html", (req, res) => {
     res.sendFile(__dirname + "/osc.html");
 });
 
-app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
+app.get("/", (req, res) => res.sendFile(__dirname + "/control.html"));
 
 // ===== Socket connection =====
 io.on("connection", (socket) => {
     // Get the referer to determine which page the client came from
     const referer = socket.handshake.headers.referer;
     const isOSCClient = referer && referer.includes('/osc.html');
-    
-    console.log("New connection - Referer:", referer);
-    console.log("Is OSC Client:", isOSCClient);
     
     // Assign session ID / user ID
     let sessionId = socket.handshake.headers.cookie?.split(";").find(c => c.trim().startsWith("oscSession="))?.split("=")[1] || uuidv4();
@@ -222,8 +310,6 @@ io.on("connection", (socket) => {
     // Only add to oscUsers if they're from osc.html
     if (isOSCClient) {
         oscUsers[socket.id] = userData;
-        console.log("OSC Client connected:", userId);
-        console.log("Total OSC clients now:", Object.keys(oscUsers).length);
         updateClientListOutlet();
     } else {
         console.log("Regular client connected:", userId);
