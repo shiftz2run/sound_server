@@ -583,7 +583,7 @@ io.on("connection", (socket) => {
 // Optional: Add a periodic update every few seconds as backup
 setInterval(() => {
   updateClientListOutlet();
-}, 5000); // Update every 5 seconds
+}, 5000); // Update every 5000 milliseconds
 
 app.use(express.static(__dirname));
 
