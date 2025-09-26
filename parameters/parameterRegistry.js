@@ -112,13 +112,6 @@ const PARAMETER_SCHEMA = {
   },
 };
 
-// === PARAMETER CATEGORIES ===
-const PARAMETER_CATEGORIES = {
-  oscillator: ["frequency", "amplitude", "waveform", "customWaveform"],
-  envelope: ["attackTime", "decayTime", "sustainLevel", "adsOn"],
-  smoothing: ["frequencySmoothing", "amplitudeSmoothing"],
-};
-
 module.exports = {
   PARAMETER_SCHEMA,
   PARAMETER_CATEGORIES,
