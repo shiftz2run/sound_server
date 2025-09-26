@@ -14,6 +14,9 @@ function registerMaxHandlers(maxApi, setParametersForClients) {
       );
     });
   });
+  maxApi.addHandler("setParameters", (params, clientIds) => {
+    return setParametersForClients(params, clientIds ? [clientIds] : null);
+  });
 }
 
 module.exports = { registerMaxHandlers };
