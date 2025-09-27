@@ -11,6 +11,12 @@ const {
 } = require("./parameters/parameterManager");
 const { registerMaxHandlers } = require("./parameters/parameterMaxHandlers");
 
+// ===== Configuration Constants =====
+const CONFIG = {
+  SERVER_PORT: 8000,
+  CLIENT_LIST_UPDATE_INTERVAL: 5000, // milliseconds
+};
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -490,10 +496,10 @@ io.on("connection", (socket) => {
 // Optional: Add a periodic update every few seconds as backup
 setInterval(() => {
   updateClientListOutlet();
-}, 5000); // Update every 5000 milliseconds
+}, CONFIG.CLIENT_LIST_UPDATE_INTERVAL);
 
 app.use(express.static(__dirname));
 
-server.listen(8000, () =>
-  console.log("Server running on http://localhost:8000"),
+server.listen(CONFIG.SERVER_PORT, () =>
+  console.log(`Server running on http://localhost:${CONFIG.SERVER_PORT}`),
 );
