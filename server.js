@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const { v4: uuidv4 } = require("uuid");
 const maxApi = require("max-api");
 const cookieParser = require("cookie-parser");
+const { PARAMETER_SCHEMA } = require("./parameters/parameterRegistry");
 
 const app = express();
 const server = http.createServer(app);
@@ -563,6 +564,11 @@ io.on("connection", (socket) => {
 
   // Send available waveform types
   socket.emit("waveformTypes", Object.keys(WAVEFORM_TYPES));
+
+  // Handle parameter schema requests
+  socket.on("getParameterSchema", () => {
+    socket.emit("parameterSchema", PARAMETER_SCHEMA);
+  });
 
   socket.on("disconnect", () => {
     const wasOSCClient = users[socket.id]?.isOSCClient;
