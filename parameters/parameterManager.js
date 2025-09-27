@@ -53,4 +53,54 @@ function getDefaultParameters() {
   return defaultValues;
 }
 
-module.exports = { validateParameter, getDefaultParameters };
+function distributeValuesToClients(valuesList, clientIds, mode = "beginning") {
+  if (!Array.isArray(valuesList) || valuesList.length === 0) {
+    return [];
+  }
+
+  if (!Array.isArray(clientIds) || clientIds.length === 0) {
+    return [];
+  }
+
+  let targetClients = [...clientIds];
+
+  // Apply distribution mode
+  switch (mode) {
+    case "end":
+      targetClients.reverse();
+      break;
+    case "random":
+      // Shuffle array using Fisher-Yates algorithm
+      for (let i = targetClients.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [targetClients[i], targetClients[j]] = [
+          targetClients[j],
+          targetClients[i],
+        ];
+      }
+      break;
+    case "beginning":
+    default:
+      // No change needed, already in order
+      break;
+  }
+
+  // Create distribution pairs (only up to the smaller of the two arrays)
+  const assignments = [];
+  const maxAssignments = Math.min(valuesList.length, targetClients.length);
+
+  for (let i = 0; i < maxAssignments; i++) {
+    assignments.push({
+      clientId: targetClients[i],
+      value: valuesList[i],
+    });
+  }
+
+  return assignments;
+}
+
+module.exports = {
+  validateParameter,
+  getDefaultParameters,
+  distributeValuesToClients,
+};
