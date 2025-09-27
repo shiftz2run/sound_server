@@ -21,6 +21,30 @@ function registerSocketParameterListeners(socket, oscillator) {
       });
     });
 
+    // Add bulk parameter update listener
+    socket.on("setParameters", (parameters) => {
+      if (oscillator && typeof parameters === "object") {
+        console.log("Bulk parameter update received:", parameters);
+
+        // Use the optimized updateParameters method if available
+        if (typeof oscillator.updateParameters === "function") {
+          oscillator.updateParameters(parameters);
+        } else {
+          // Fallback to individual parameter setting
+          Object.entries(parameters).forEach(([param, value]) => {
+            const setterName = `set${capitalize(param)}`;
+            if (typeof oscillator[setterName] === "function") {
+              oscillator[setterName](value);
+            } else {
+              console.warn(`No setter method found for parameter: ${param}`);
+            }
+          });
+        }
+
+        console.log("Bulk update applied successfully");
+      }
+    });
+
     console.log(
       "Auto-generated socket listeners for parameters:",
       Object.keys(parameterSchema),

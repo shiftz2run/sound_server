@@ -114,5 +114,4 @@ const PARAMETER_SCHEMA = {
 
 module.exports = {
   PARAMETER_SCHEMA,
-  PARAMETER_CATEGORIES,
 };
