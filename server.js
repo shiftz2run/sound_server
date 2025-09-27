@@ -113,16 +113,18 @@ function updateClientListOutlet() {
   // Also emit to all web clients for dashboard updates
   const userData = Object.values(oscUsers).map((user) => ({
     id: user.id,
-    frequency: user.frequency || 440,
-    amplitude: user.amplitude || 0.5,
-    attackTime: user.attackTime || 0,
-    decayTime: user.decayTime || 0,
-    sustainLevel: user.sustainLevel || 0.5,
-    frequencySmoothing: user.frequencySmoothing || 0,
-    amplitudeSmoothing: user.amplitudeSmoothing || 0,
-    adsOn: user.adsOn || false,
-    waveform: user.waveform || "sine",
-    customWaveform: user.customWaveform || null,
+    frequency: user.frequency || defaultParams.frequency,
+    amplitude: user.amplitude || defaultParams.amplitude,
+    attackTime: user.attackTime || defaultParams.attackTime,
+    decayTime: user.decayTime || defaultParams.decayTime,
+    sustainLevel: user.sustainLevel || defaultParams.sustainLevel,
+    frequencySmoothing:
+      user.frequencySmoothing || defaultParams.frequencySmoothing,
+    amplitudeSmoothing:
+      user.amplitudeSmoothing || defaultParams.amplitudeSmoothing,
+    adsOn: user.adsOn || defaultParams.adsOn,
+    waveform: user.waveform || defaultParams.waveform,
+    customWaveform: user.customWaveform || defaultParams.customWaveform,
   }));
 
   io.emit("usersUpdate", userData);
@@ -232,16 +234,18 @@ maxApi.addHandler("getUsersObject", () => {
     usersObject[userNumber] = {
       socketId: socketId,
       id: userData.id,
-      frequency: userData.frequency || 440,
-      amplitude: userData.amplitude || 0.5,
-      attackTime: userData.attackTime || 0,
-      decayTime: userData.decayTime || 0,
-      sustainLevel: userData.sustainLevel || 0.5,
-      frequencySmoothing: userData.frequencySmoothing || 0,
-      amplitudeSmoothing: userData.amplitudeSmoothing || 0,
-      adsOn: userData.adsOn || false,
-      waveform: userData.waveform || "sine",
-      customWaveform: userData.customWaveform || null,
+      frequency: userData.frequency || defaultParams.frequency,
+      amplitude: userData.amplitude || defaultParams.amplitude,
+      attackTime: userData.attackTime || defaultParams.attackTime,
+      decayTime: userData.decayTime || defaultParams.decayTime,
+      sustainLevel: userData.sustainLevel || defaultParams.sustainLevel,
+      frequencySmoothing:
+        userData.frequencySmoothing || defaultParams.frequencySmoothing,
+      amplitudeSmoothing:
+        userData.amplitudeSmoothing || defaultParams.amplitudeSmoothing,
+      adsOn: userData.adsOn || defaultParams.adsOn,
+      waveform: userData.waveform || defaultParams.waveform,
+      customWaveform: userData.customWaveform || defaultParams.customWaveform,
     };
   });
 
@@ -259,16 +263,22 @@ maxApi.addHandler("getUserByNumber", (userNumber) => {
     const userData = {
       socketId: socketId,
       id: oscUsers[socketId].id,
-      frequency: oscUsers[socketId].frequency || 440,
-      amplitude: oscUsers[socketId].amplitude || 0.5,
-      attackTime: oscUsers[socketId].attackTime || 0.1,
-      decayTime: oscUsers[socketId].decayTime || 0.1,
-      sustainLevel: oscUsers[socketId].sustainLevel || 0.5,
-      frequencySmoothing: oscUsers[socketId].frequencySmoothing || 0.1,
-      amplitudeSmoothing: oscUsers[socketId].amplitudeSmoothing || 0.1,
-      adsOn: oscUsers[socketId].adsOn || false,
-      waveform: oscUsers[socketId].waveform || "sine",
-      customWaveform: oscUsers[socketId].customWaveform || null,
+      frequency: oscUsers[socketId].frequency || defaultParams.frequency,
+      amplitude: oscUsers[socketId].amplitude || defaultParams.amplitude,
+      attackTime: oscUsers[socketId].attackTime || defaultParams.attackTime,
+      decayTime: oscUsers[socketId].decayTime || defaultParams.decayTime,
+      sustainLevel:
+        oscUsers[socketId].sustainLevel || defaultParams.sustainLevel,
+      frequencySmoothing:
+        oscUsers[socketId].frequencySmoothing ||
+        defaultParams.frequencySmoothing,
+      amplitudeSmoothing:
+        oscUsers[socketId].amplitudeSmoothing ||
+        defaultParams.amplitudeSmoothing,
+      adsOn: oscUsers[socketId].adsOn || defaultParams.adsOn,
+      waveform: oscUsers[socketId].waveform || defaultParams.waveform,
+      customWaveform:
+        oscUsers[socketId].customWaveform || defaultParams.customWaveform,
     };
 
     maxApi.outlet("userData", userData);
@@ -311,16 +321,22 @@ maxApi.addHandler("getUser", (socketId) => {
   if (oscUsers[socketId]) {
     const userData = {
       id: oscUsers[socketId].id,
-      frequency: oscUsers[socketId].frequency || 440,
-      amplitude: oscUsers[socketId].amplitude || 0.5,
-      attackTime: oscUsers[socketId].attackTime || 0.1,
-      decayTime: oscUsers[socketId].decayTime || 0.1,
-      sustainLevel: oscUsers[socketId].sustainLevel || 0.5,
-      frequencySmoothing: oscUsers[socketId].frequencySmoothing || 0.1,
-      amplitudeSmoothing: oscUsers[socketId].amplitudeSmoothing || 0.1,
-      adsOn: oscUsers[socketId].adsOn || false,
-      waveform: oscUsers[socketId].waveform || "sine",
-      customWaveform: oscUsers[socketId].customWaveform || null,
+      frequency: oscUsers[socketId].frequency || defaultParams.frequency,
+      amplitude: oscUsers[socketId].amplitude || defaultParams.amplitude,
+      attackTime: oscUsers[socketId].attackTime || defaultParams.attackTime,
+      decayTime: oscUsers[socketId].decayTime || defaultParams.decayTime,
+      sustainLevel:
+        oscUsers[socketId].sustainLevel || defaultParams.sustainLevel,
+      frequencySmoothing:
+        oscUsers[socketId].frequencySmoothing ||
+        defaultParams.frequencySmoothing,
+      amplitudeSmoothing:
+        oscUsers[socketId].amplitudeSmoothing ||
+        defaultParams.amplitudeSmoothing,
+      adsOn: oscUsers[socketId].adsOn || defaultParams.adsOn,
+      waveform: oscUsers[socketId].waveform || defaultParams.waveform,
+      customWaveform:
+        oscUsers[socketId].customWaveform || defaultParams.customWaveform,
     };
 
     maxApi.outlet("userData", userData);
