@@ -28,12 +28,20 @@ const defaultParams = getDefaultParameters();
 function setParametersForClients(parameters, clientIds = null) {
   const results = { success: [], errors: [] };
 
-  // Validate all parameters first
+  // Validate all parameters and separate valid from invalid
+  const validParameters = {};
   for (const [param, value] of Object.entries(parameters)) {
     const validation = validateParameter(param, value);
     if (!validation.valid) {
       results.errors.push({ param, value, error: validation.error });
+    } else {
+      validParameters[param] = value;
     }
+  }
+
+  // If no valid parameters, return early
+  if (Object.keys(validParameters).length === 0) {
+    return results;
   }
 
   // Determine target clients
@@ -46,8 +54,8 @@ function setParametersForClients(parameters, clientIds = null) {
     targetClients = clientIds.filter((id) => users[id]);
   }
 
-  // Update user data for all parameters
-  for (const [param, value] of Object.entries(parameters)) {
+  // Update user data for all valid parameters
+  for (const [param, value] of Object.entries(validParameters)) {
     if (targetClients.length === 0) {
       // Update default params if no specific clients
       defaultParams[param] = value;
@@ -75,14 +83,14 @@ function setParametersForClients(parameters, clientIds = null) {
     });
   }
 
-  // Send bulk parameter update via socket
+  // Send bulk parameter update via socket (only valid parameters)
   if (targetClients.length === 0) {
     // Emit to all clients
-    io.emit("setParameters", parameters);
+    io.emit("setParameters", validParameters);
   } else {
     // Emit to specific clients
     targetClients.forEach((socketId) => {
-      io.to(socketId).emit("setParameters", parameters);
+      io.to(socketId).emit("setParameters", validParameters);
     });
   }
 
