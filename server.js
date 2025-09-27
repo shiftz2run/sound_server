@@ -8,6 +8,7 @@ const { PARAMETER_SCHEMA } = require("./parameters/parameterRegistry");
 const {
   validateParameter,
   getDefaultParameters,
+  distributeValuesToClients,
 } = require("./parameters/parameterManager");
 const { registerMaxHandlers } = require("./parameters/parameterMaxHandlers");
 
@@ -106,6 +107,36 @@ function setParametersForClients(parameters, clientIds = null) {
   return results;
 }
 
+// ===== List Parameter Setting Function =====
+function setParametersListForClients(
+  param,
+  valuesList,
+  mode = "beginning",
+  clientIds = null,
+) {
+  // Get current clients
+  const availableClients = clientIds
+    ? clientIds.filter((id) => users[id])
+    : Object.keys(users);
+
+  // Distribute values to clients
+  const assignments = distributeValuesToClients(
+    valuesList,
+    availableClients,
+    mode,
+  );
+
+  // Apply each assignment individually
+  const results = { success: [], errors: [] };
+  assignments.forEach(({ clientId, value }) => {
+    const result = setParametersForClients({ [param]: value }, [clientId]);
+    results.success.push(...result.success);
+    results.errors.push(...result.errors);
+  });
+
+  return results;
+}
+
 // Function to send updated client list to Max and web dashboard
 function updateClientListOutlet() {
   const clientList = Object.keys(oscUsers);
@@ -138,7 +169,11 @@ function updateClientListOutlet() {
 
 // ===== Max API Handlers =====
 // Register the new centralized parameter handlers
-registerMaxHandlers(maxApi, setParametersForClients);
+registerMaxHandlers(
+  maxApi,
+  setParametersForClients,
+  setParametersListForClients,
+);
 
 // Enhanced parameters handler with new system
 maxApi.addHandler("parameters", (...params) => {
