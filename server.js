@@ -439,11 +439,8 @@ io.on("connection", (socket) => {
     console.log("Regular client connected:", userId);
   }
 
-  // Send initial params including waveform
-  // setParametersForClients(defaultParams, clientId);
-  Object.entries(defaultParams).forEach(([param, value]) => {
-    socket.emit(param, value);
-  });
+  // Send initial params using bulk update
+  socket.emit("setParameters", defaultParams);
   socket.emit("setUserId", userId);
   socket.emit("clientType", isOSCClient ? "osc" : "regular");
 
