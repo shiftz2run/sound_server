@@ -31,14 +31,24 @@ function validateParameter(param, value) {
     validation.valid = true;
     return validation;
   }
+  if (schema.type === "boolean") {
+    validation.valid = true;
+    return validation;
+  }
+  if (schema.type === "array") {
+    if (!Array.isArray(value)) {
+      validation.error = `Invalid type for parameter ${param}: expected array, got ${typeof value}`;
+      return validation;
+    }
+    validation.valid = true;
+    return validation;
+  }
 }
 
 function getDefaultParameters() {
   const defaultValues = {};
-  for (const schema in PARAMETER_SCHEMA) {
-    if (validateParameter(schema, PARAMETER_SCHEMA[schema].default)) {
-      defaultValues[schema] = PARAMETER_SCHEMA[schema].default;
-    }
+  for (const param in PARAMETER_SCHEMA) {
+    defaultValues[param] = PARAMETER_SCHEMA[param].default;
   }
   return defaultValues;
 }
