@@ -137,6 +137,69 @@ function setParametersListForClients(
   return results;
 }
 
+// ===== FFT Data Distribution Function =====
+function setFFTDataForClients(
+  fftDataArray,
+  mode = "beginning",
+  clientIds = null,
+) {
+  const results = { success: [], errors: [] };
+
+  // Validate FFT data array
+  if (!Array.isArray(fftDataArray)) {
+    results.errors.push({ error: "FFT data must be an array" });
+    return results;
+  }
+
+  if (fftDataArray.length % 2 !== 0) {
+    results.errors.push({
+      error: "FFT data array must have even length (amp/freq pairs)",
+    });
+    return results;
+  }
+
+  // Parse FFT data into amp/freq pairs
+  const fftPairs = [];
+  for (let i = 0; i < fftDataArray.length; i += 2) {
+    fftPairs.push({
+      amplitude: fftDataArray[i],
+      frequency: fftDataArray[i + 1],
+    });
+  }
+
+  // Get current clients
+  const availableClients = clientIds
+    ? clientIds.filter((id) => users[id])
+    : Object.keys(users);
+
+  // Distribute FFT pairs to clients using existing distribution logic
+  const assignments = distributeValuesToClients(
+    fftPairs,
+    availableClients,
+    mode,
+  );
+
+  // Apply each assignment (both amplitude and frequency for each client)
+  assignments.forEach(({ clientId, value }) => {
+    const result = setParametersForClients(
+      {
+        amplitude: value.amplitude,
+        frequency: value.frequency,
+      },
+      [clientId],
+    );
+    results.success.push({
+      clientId,
+      amplitude: value.amplitude,
+      frequency: value.frequency,
+      parameterResults: result,
+    });
+    results.errors.push(...result.errors);
+  });
+
+  return results;
+}
+
 // Function to send updated client list to Max and web dashboard
 function updateClientListOutlet() {
   const clientList = Object.keys(oscUsers);
@@ -173,6 +236,7 @@ registerMaxHandlers(
   maxApi,
   setParametersForClients,
   setParametersListForClients,
+  setFFTDataForClients,
 );
 
 // Enhanced parameters handler with new system

@@ -8,6 +8,7 @@ function registerMaxHandlers(
   maxApi,
   setParametersForClients,
   setParametersListForClients,
+  setFFTDataForClients,
 ) {
   // Auto-generate all Max handlers
   Object.keys(PARAMETER_SCHEMA).forEach((param) => {
@@ -35,6 +36,18 @@ function registerMaxHandlers(
   maxApi.addHandler("setParameters", (params, clientIds) => {
     return setParametersForClients(params, clientIds ? [clientIds] : null);
   });
+
+  // FFT data distribution handler
+  maxApi.addHandler(
+    "setFFTData",
+    (fftDataArray, mode = "beginning", clientIds = null) => {
+      return setFFTDataForClients(
+        fftDataArray,
+        mode,
+        clientIds ? [clientIds] : null,
+      );
+    },
+  );
 }
 
 module.exports = { registerMaxHandlers };
