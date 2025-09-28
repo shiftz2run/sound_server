@@ -7,6 +7,14 @@ function validateParameter(param, value) {
     return validation;
   }
   const schema = PARAMETER_SCHEMA[param];
+  if (schema.type === "enum") {
+    if (!schema.values.includes(value)) {
+      validation.error = `Invalid value for parameter ${param}: must be one of ${schema.values.join(", ")}`;
+      return validation;
+    }
+    validation.valid = true;
+    return validation;
+  }
   if (typeof value !== schema.type) {
     validation.error = `Invalid type for parameter ${param}: expected ${schema.type}, got ${typeof value}`;
     return validation;
@@ -18,14 +26,6 @@ function validateParameter(param, value) {
     }
     if (schema.max !== undefined && value > schema.max) {
       validation.error = `Invalid value for parameter ${param}: must be at most ${schema.max}`;
-      return validation;
-    }
-    validation.valid = true;
-    return validation;
-  }
-  if (schema.type === "enum") {
-    if (!schema.values.includes(value)) {
-      validation.error = `Invalid value for parameter ${param}: must be one of ${schema.values.join(", ")}`;
       return validation;
     }
     validation.valid = true;
