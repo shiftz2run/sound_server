@@ -27,7 +27,7 @@ const PARAMETER_SCHEMA = {
     type: "enum",
     values: ["sine", "square", "sawtooth", "triangle", "custom"],
     default: "sine",
-    unit: null,
+    unit: undefined,
     category: "oscillator",
     requiresRestart: true,
     description: "Oscillator waveform type",
@@ -36,7 +36,7 @@ const PARAMETER_SCHEMA = {
   customWaveform: {
     type: "array",
     elementType: "number",
-    default: null,
+    default: undefined,
     unit: "coefficients",
     category: "oscillator",
     requiresRestart: true,
@@ -47,7 +47,7 @@ const PARAMETER_SCHEMA = {
   attackTime: {
     type: "number",
     min: 0,
-    max: null,
+    max: undefined,
     default: 0.1,
     unit: "s",
     category: "envelope",
@@ -58,7 +58,7 @@ const PARAMETER_SCHEMA = {
   decayTime: {
     type: "number",
     min: 0,
-    max: null,
+    max: undefined,
     default: 0.1,
     unit: "s",
     category: "envelope",
@@ -80,7 +80,7 @@ const PARAMETER_SCHEMA = {
   adsOn: {
     type: "boolean",
     default: false,
-    unit: null,
+    unit: undefined,
     category: "envelope",
     requiresRestart: false,
     description: "Enable/disable ADS envelope",
@@ -90,7 +90,7 @@ const PARAMETER_SCHEMA = {
   frequencySmoothing: {
     type: "number",
     min: 0,
-    max: null,
+    max: undefined,
     default: 0,
     unit: "coefficient",
     category: "smoothing",
@@ -102,7 +102,7 @@ const PARAMETER_SCHEMA = {
   amplitudeSmoothing: {
     type: "number",
     min: 0,
-    max: null,
+    max: undefined,
     default: 0,
     unit: "coefficient",
     category: "smoothing",
