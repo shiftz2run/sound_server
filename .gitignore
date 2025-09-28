@@ -6,3 +6,7 @@ qr.png
 
 # Temporary files
 temp/
+
+# Operating System files
+.DS_Store
+Thumbs.db
