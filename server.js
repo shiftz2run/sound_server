@@ -42,7 +42,7 @@ function setParametersForClients(parameters, clientIds = null) {
     if (!validation.valid) {
       results.errors.push({ param, value, error: validation.error });
     } else {
-      validParameters[param] = value;
+      validParameters[param] = validation.value;
     }
   }
 
