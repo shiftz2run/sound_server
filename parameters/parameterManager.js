@@ -8,13 +8,9 @@ function validateParameter(param, value) {
   }
   const schema = PARAMETER_SCHEMA[param];
 
-  // Convert string booleans to actual booleans (for Max compatibility)
-  if (schema.type === "boolean" && typeof value === "string") {
-    if (value.toLowerCase() === "true") {
-      validation.value = true;
-    } else if (value.toLowerCase() === "false") {
-      validation.value = false;
-    }
+  // Convert numbers to booleans (for Max compatibility: 0 → false, 1 → true)
+  if (schema.type === "boolean" && typeof value === "number") {
+    validation.value = Boolean(value);
   }
 
   if (schema.type === "enum") {
