@@ -10,3 +10,6 @@ temp/
 # Operating System files
 .DS_Store
 Thumbs.db
+
+# Trashbin
+trash/
