@@ -48,7 +48,7 @@ function getLocalIPv4() {
   return null;
 }
 
-async function generate(url, outPng = "qr.png") {
+async function generate(url, outPng = "../assets/qr.png") {
   try {
     await QRCode.toFile(outPng, url, { errorCorrectionLevel: "quartile" });
     console.log(new Date().toISOString(), `Saved: ${outPng}`);

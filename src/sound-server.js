@@ -519,10 +519,10 @@ maxApi.addHandler("setOSCParameter", (param, value, clientId) => {
 
 // ===== Routes =====
 app.get("/osc.html", (req, res) => {
-  res.sendFile(__dirname + "/osc.html");
+  res.sendFile(__dirname + "/../public/osc.html");
 });
 
-app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
+app.get("/", (req, res) => res.sendFile(__dirname + "/../public/index.html"));
 
 // ===== Socket connection =====
 io.on("connection", (socket) => {
@@ -597,7 +597,7 @@ setInterval(() => {
   updateClientListOutlet();
 }, CONFIG.CLIENT_LIST_UPDATE_INTERVAL);
 
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + "/.."));
 
 server.listen(CONFIG.SERVER_PORT, () =>
   console.log(`Server running on http://localhost:${CONFIG.SERVER_PORT}`),
