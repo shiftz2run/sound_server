@@ -4,6 +4,19 @@ const { Server } = require("socket.io");
 const { v4: uuidv4 } = require("uuid");
 const maxApi = require("max-api");
 const cookieParser = require("cookie-parser");
+const { PARAMETER_SCHEMA } = require("./parameters/parameterRegistry");
+const {
+  validateParameter,
+  getDefaultParameters,
+  distributeValuesToClients,
+} = require("./parameters/parameterManager");
+const { registerMaxHandlers } = require("./parameters/parameterMaxHandlers");
+
+// ===== Configuration Constants =====
+const CONFIG = {
+  SERVER_PORT: 8000,
+  CLIENT_LIST_UPDATE_INTERVAL: 5000, // milliseconds
+};
 
 const app = express();
 const server = http.createServer(app);
@@ -15,34 +28,176 @@ let oscUsers = {}; // Only users from /osc.html
 let userSessions = {}; // { sessionId: { userId, timestamp } }
 let debugMode = false;
 
-// Available waveform types
-const WAVEFORM_TYPES = {
-  sine: "sine",
-  square: "square",
-  sawtooth: "sawtooth",
-  triangle: "triangle",
-};
+// Get default parameters from schema
+const defaultParams = getDefaultParameters();
 
-// Global default parameters
-let defaultParams = {
-  frequencySmoothing: 0,
-  amplitudeSmoothing: 0,
-  attackTime: 0,
-  decayTime: 0,
-  sustainLevel: 0.5,
-  adsOn: false,
-  frequency: 440,
-  amplitude: 0.5,
-  waveform: "sine", // New waveform parameter
-};
+// ===== Central Parameter Setting Function =====
+function setParametersForClients(parameters, clientIds = null) {
+  const results = { success: [], errors: [] };
 
-// ===== Utility to emit to one or all =====
-function emitParam(param, value, clientId) {
-  if (clientId && users[clientId]) {
-    io.to(clientId).emit(param, value);
-  } else {
-    io.emit(param, value);
+  // Validate all parameters and separate valid from invalid
+  const validParameters = {};
+  for (const [param, value] of Object.entries(parameters)) {
+    const validation = validateParameter(param, value);
+    if (!validation.valid) {
+      results.errors.push({ param, value, error: validation.error });
+    } else {
+      validParameters[param] = validation.value;
+    }
   }
+
+  // If no valid parameters, return early
+  if (Object.keys(validParameters).length === 0) {
+    return results;
+  }
+
+  // Determine target clients
+  let targetClients = [];
+  if (clientIds === null) {
+    // Apply to all clients
+    targetClients = Object.keys(users);
+  } else {
+    // Apply to specific clients
+    targetClients = clientIds.filter((id) => users[id]);
+  }
+
+  // Update user data for all valid parameters
+  for (const [param, value] of Object.entries(validParameters)) {
+    if (targetClients.length === 0) {
+      // Update default params if no specific clients
+      defaultParams[param] = value;
+      // Update all user data
+      Object.keys(users).forEach((socketId) => {
+        users[socketId][param] = value;
+        if (oscUsers[socketId]) {
+          oscUsers[socketId][param] = value;
+        }
+      });
+    } else {
+      // Update specific clients
+      targetClients.forEach((socketId) => {
+        users[socketId][param] = value;
+        if (oscUsers[socketId]) {
+          oscUsers[socketId][param] = value;
+        }
+      });
+    }
+
+    results.success.push({
+      param,
+      value,
+      clients: targetClients.length || "all",
+    });
+  }
+
+  // Send bulk parameter update via socket (only valid parameters)
+  if (targetClients.length === 0) {
+    // Emit to all clients
+    io.emit("setParameters", validParameters);
+  } else {
+    // Emit to specific clients
+    targetClients.forEach((socketId) => {
+      io.to(socketId).emit("setParameters", validParameters);
+    });
+  }
+
+  // Update web dashboard
+  updateClientListOutlet();
+
+  return results;
+}
+
+// ===== List Parameter Setting Function =====
+function setParametersListForClients(
+  param,
+  valuesList,
+  mode = "beginning",
+  clientIds = null,
+) {
+  // Get current clients
+  const availableClients = clientIds
+    ? clientIds.filter((id) => users[id])
+    : Object.keys(users);
+
+  // Distribute values to clients
+  const assignments = distributeValuesToClients(
+    valuesList,
+    availableClients,
+    mode,
+  );
+
+  // Apply each assignment individually
+  const results = { success: [], errors: [] };
+  assignments.forEach(({ clientId, value }) => {
+    const result = setParametersForClients({ [param]: value }, [clientId]);
+    results.success.push(...result.success);
+    results.errors.push(...result.errors);
+  });
+
+  return results;
+}
+
+// ===== FFT Data Distribution Function =====
+function setFFTDataForClients(
+  fftDataArray,
+  mode = "beginning",
+  clientIds = null,
+) {
+  const results = { success: [], errors: [] };
+
+  // Validate FFT data array
+  if (!Array.isArray(fftDataArray)) {
+    results.errors.push({ error: "FFT data must be an array" });
+    return results;
+  }
+
+  if (fftDataArray.length % 2 !== 0) {
+    results.errors.push({
+      error: "FFT data array must have even length (amp/freq pairs)",
+    });
+    return results;
+  }
+
+  // Parse FFT data into amp/freq pairs
+  const fftPairs = [];
+  for (let i = 0; i < fftDataArray.length; i += 2) {
+    fftPairs.push({
+      amplitude: fftDataArray[i],
+      frequency: fftDataArray[i + 1],
+    });
+  }
+
+  // Get current clients
+  const availableClients = clientIds
+    ? clientIds.filter((id) => users[id])
+    : Object.keys(users);
+
+  // Distribute FFT pairs to clients using existing distribution logic
+  const assignments = distributeValuesToClients(
+    fftPairs,
+    availableClients,
+    mode,
+  );
+
+  // Apply each assignment (both amplitude and frequency for each client)
+  assignments.forEach(({ clientId, value }) => {
+    const result = setParametersForClients(
+      {
+        amplitude: value.amplitude,
+        frequency: value.frequency,
+      },
+      [clientId],
+    );
+    results.success.push({
+      clientId,
+      amplitude: value.amplitude,
+      frequency: value.frequency,
+      parameterResults: result,
+    });
+    results.errors.push(...result.errors);
+  });
+
+  return results;
 }
 
 // Function to send updated client list to Max and web dashboard
@@ -58,135 +213,96 @@ function updateClientListOutlet() {
   // Also emit to all web clients for dashboard updates
   const userData = Object.values(oscUsers).map((user) => ({
     id: user.id,
-    frequency: user.frequency || 440,
-    amplitude: user.amplitude || 0.5,
-    attackTime: user.attackTime || 0,
-    decayTime: user.decayTime || 0,
-    sustainLevel: user.sustainLevel || 0.5,
-    frequencySmoothing: user.frequencySmoothing || 0,
-    amplitudeSmoothing: user.amplitudeSmoothing || 0,
-    adsOn: user.adsOn || false,
-    waveform: user.waveform || "sine",
-    customWaveform: user.customWaveform || null,
+    frequency: user.frequency || defaultParams.frequency,
+    amplitude: user.amplitude || defaultParams.amplitude,
+    attackTime: user.attackTime || defaultParams.attackTime,
+    decayTime: user.decayTime || defaultParams.decayTime,
+    sustainLevel: user.sustainLevel || defaultParams.sustainLevel,
+    frequencySmoothing:
+      user.frequencySmoothing || defaultParams.frequencySmoothing,
+    amplitudeSmoothing:
+      user.amplitudeSmoothing || defaultParams.amplitudeSmoothing,
+    adsOn: user.adsOn || defaultParams.adsOn,
+    waveform: user.waveform || defaultParams.waveform,
+    customWaveform: user.customWaveform || defaultParams.customWaveform,
   }));
 
   io.emit("usersUpdate", userData);
 }
 
 // ===== Max API Handlers =====
-maxApi.addHandler("setParameter", (param, value, clientId) => {
-  // Update global default if no clientId
-  if (!clientId) defaultParams[param] = value;
+// Register the new centralized parameter handlers
+registerMaxHandlers(
+  maxApi,
+  setParametersForClients,
+  setParametersListForClients,
+  setFFTDataForClients,
+);
 
-  // Update user data
-  if (clientId && users[clientId]) {
-    users[clientId][param] = value;
-    if (oscUsers[clientId]) {
-      oscUsers[clientId][param] = value;
-    }
-  } else {
-    // Update all users
-    Object.keys(users).forEach((socketId) => {
-      users[socketId][param] = value;
-    });
-    Object.keys(oscUsers).forEach((socketId) => {
-      oscUsers[socketId][param] = value;
-    });
-  }
-
-  // Emit to the right client(s)
-  emitParam(param, value, clientId);
-
-  // Update web dashboard
-  updateClientListOutlet();
-
-  console.log(
-    `Parameter "${param}" set to ${value} ${clientId ? `for client ${clientId}` : "for all clients"}`,
-  );
-});
-
-// Enhanced parameters handler with waveform support
+// Enhanced parameters handler with new system
 maxApi.addHandler("parameters", (...params) => {
   // params format: [clientId?, amp, freq, attack, decay, sustain, waveform?]
   let offset = 0;
   let clientId = null;
 
   if (typeof params[0] === "string") {
-    clientId = params[0]; // first arg is client ID
+    clientId = params[0];
     offset = 1;
   }
 
   const [amp, freq, attack, decay, sustain, waveform] = params.slice(offset);
 
-  if (amp !== undefined) emitParam("amplitude", amp, clientId);
-  if (freq !== undefined) emitParam("frequency", freq, clientId);
-  if (attack !== undefined) emitParam("attackTime", attack, clientId);
-  if (decay !== undefined) emitParam("decayTime", decay, clientId);
-  if (sustain !== undefined) emitParam("sustainLevel", sustain, clientId);
-  if (waveform !== undefined && WAVEFORM_TYPES[waveform]) {
-    emitParam("waveform", waveform, clientId);
-  }
+  const parameters = {};
+  if (amp !== undefined) parameters.amplitude = amp;
+  if (freq !== undefined) parameters.frequency = freq;
+  if (attack !== undefined) parameters.attackTime = attack;
+  if (decay !== undefined) parameters.decayTime = decay;
+  if (sustain !== undefined) parameters.sustainLevel = sustain;
+  if (waveform !== undefined) parameters.waveform = waveform;
 
-  // Update web dashboard after parameter changes
-  updateClientListOutlet();
+  const result = setParametersForClients(
+    parameters,
+    clientId ? [clientId] : null,
+  );
+  if (result.errors.length > 0) {
+    console.error(`Parameters error: ${result.errors[0].error}`);
+    maxApi.outlet("parameterError", result.errors[0]);
+    return false;
+  }
+  return true;
 });
 
-// Enhanced bulk parameters handler with waveform support
+// Enhanced bulk parameters handler using new system
 maxApi.addHandler(
   "parametersByNumber",
   (userNumber, amp, freq, attack, decay, sustain, waveform) => {
     const socketIds = Object.keys(oscUsers);
-    const index = userNumber - 1; // Convert to 0-based index
+    const index = userNumber - 1;
 
     if (index >= 0 && index < socketIds.length) {
       const socketId = socketIds[index];
 
-      if (amp !== undefined) {
-        oscUsers[socketId].amplitude = amp;
-        users[socketId].amplitude = amp;
-        io.to(socketId).emit("amplitude", amp);
-      }
-      if (freq !== undefined) {
-        oscUsers[socketId].frequency = freq;
-        users[socketId].frequency = freq;
-        io.to(socketId).emit("frequency", freq);
-      }
-      if (attack !== undefined) {
-        oscUsers[socketId].attackTime = attack;
-        users[socketId].attackTime = attack;
-        io.to(socketId).emit("attackTime", attack);
-      }
-      if (decay !== undefined) {
-        oscUsers[socketId].decayTime = decay;
-        users[socketId].decayTime = decay;
-        io.to(socketId).emit("decayTime", decay);
-      }
-      if (sustain !== undefined) {
-        oscUsers[socketId].sustainLevel = sustain;
-        users[socketId].sustainLevel = sustain;
-        io.to(socketId).emit("sustainLevel", sustain);
-      }
-      if (waveform !== undefined && WAVEFORM_TYPES[waveform]) {
-        oscUsers[socketId].waveform = waveform;
-        users[socketId].waveform = waveform;
-        io.to(socketId).emit("waveform", waveform);
-      }
+      const parameters = {};
+      if (amp !== undefined) parameters.amplitude = amp;
+      if (freq !== undefined) parameters.frequency = freq;
+      if (attack !== undefined) parameters.attackTime = attack;
+      if (decay !== undefined) parameters.decayTime = decay;
+      if (sustain !== undefined) parameters.sustainLevel = sustain;
+      if (waveform !== undefined) parameters.waveform = waveform;
 
-      // Update web dashboard
-      updateClientListOutlet();
+      const result = setParametersForClients(parameters, [socketId]);
+      if (result.errors.length > 0) {
+        console.error(
+          `Bulk parameters error for user ${userNumber}: ${result.errors[0].error}`,
+        );
+        maxApi.outlet("parameterError", result.errors[0]);
+        return false;
+      }
 
       console.log(
         `Bulk parameters updated for user ${userNumber} (${socketId})`,
       );
-      maxApi.outlet("parametersSet", {
-        userNumber,
-        amp,
-        freq,
-        attack,
-        decay,
-        sustain,
-        waveform,
-      });
+      maxApi.outlet("parametersSet", { userNumber, ...parameters });
       return true;
     } else {
       console.log(`User ${userNumber} not found for bulk parameter update`);
@@ -196,112 +312,10 @@ maxApi.addHandler(
   },
 );
 
-// New waveform-specific handlers
-maxApi.addHandler("setWaveform", (waveform, clientId) => {
-  if (!WAVEFORM_TYPES[waveform]) {
-    console.log(`Invalid waveform type: ${waveform}`);
-    maxApi.outlet("error", `Invalid waveform type: ${waveform}`);
-    return false;
-  }
-
-  // Update user data
-  if (clientId && users[clientId]) {
-    users[clientId].waveform = waveform;
-    if (oscUsers[clientId]) {
-      oscUsers[clientId].waveform = waveform;
-    }
-    io.to(clientId).emit("waveform", waveform);
-  } else {
-    // Update all users
-    Object.keys(users).forEach((socketId) => {
-      users[socketId].waveform = waveform;
-    });
-    Object.keys(oscUsers).forEach((socketId) => {
-      oscUsers[socketId].waveform = waveform;
-    });
-    io.emit("waveform", waveform);
-  }
-
-  updateClientListOutlet();
-  console.log(
-    `Waveform set to ${waveform} ${clientId ? `for client ${clientId}` : "for all clients"}`,
-  );
-  return true;
-});
-
-maxApi.addHandler("setWaveformByNumber", (userNumber, waveform) => {
-  if (!WAVEFORM_TYPES[waveform]) {
-    console.log(`Invalid waveform type: ${waveform}`);
-    maxApi.outlet("error", `Invalid waveform type: ${waveform}`);
-    return false;
-  }
-
-  const socketIds = Object.keys(oscUsers);
-  const index = userNumber - 1;
-
-  if (index >= 0 && index < socketIds.length) {
-    const socketId = socketIds[index];
-
-    oscUsers[socketId].waveform = waveform;
-    users[socketId].waveform = waveform;
-    io.to(socketId).emit("waveform", waveform);
-
-    updateClientListOutlet();
-
-    console.log(
-      `Waveform set to ${waveform} for user ${userNumber} (${socketId})`,
-    );
-    maxApi.outlet("waveformSet", { userNumber, waveform });
-    return true;
-  } else {
-    console.log(`User ${userNumber} not found for waveform update`);
-    maxApi.outlet("userNotFound", userNumber);
-    return false;
-  }
-});
-
-// Custom waveform handler - accepts array of values for periodic wave
-maxApi.addHandler("setCustomWaveform", (waveformData, clientId) => {
-  if (!Array.isArray(waveformData)) {
-    console.log("Custom waveform data must be an array");
-    maxApi.outlet("error", "Custom waveform data must be an array");
-    return false;
-  }
-
-  // Update user data
-  if (clientId && users[clientId]) {
-    users[clientId].customWaveform = waveformData;
-    users[clientId].waveform = "custom";
-    if (oscUsers[clientId]) {
-      oscUsers[clientId].customWaveform = waveformData;
-      oscUsers[clientId].waveform = "custom";
-    }
-    io.to(clientId).emit("customWaveform", waveformData);
-    io.to(clientId).emit("waveform", "custom");
-  } else {
-    // Update all users
-    Object.keys(users).forEach((socketId) => {
-      users[socketId].customWaveform = waveformData;
-      users[socketId].waveform = "custom";
-    });
-    Object.keys(oscUsers).forEach((socketId) => {
-      oscUsers[socketId].customWaveform = waveformData;
-      oscUsers[socketId].waveform = "custom";
-    });
-    io.emit("customWaveform", waveformData);
-    io.emit("waveform", "custom");
-  }
-
-  updateClientListOutlet();
-  console.log(
-    `Custom waveform set ${clientId ? `for client ${clientId}` : "for all clients"}`,
-  );
-  return true;
-});
-
 // Get available waveform types
 maxApi.addHandler("getWaveformTypes", () => {
-  const types = Object.keys(WAVEFORM_TYPES);
+  const waveformSchema = PARAMETER_SCHEMA.waveform;
+  const types = waveformSchema ? waveformSchema.values : [];
   maxApi.outlet("waveformTypes", types);
   return types;
 });
@@ -325,16 +339,18 @@ maxApi.addHandler("getUsersObject", () => {
     usersObject[userNumber] = {
       socketId: socketId,
       id: userData.id,
-      frequency: userData.frequency || 440,
-      amplitude: userData.amplitude || 0.5,
-      attackTime: userData.attackTime || 0,
-      decayTime: userData.decayTime || 0,
-      sustainLevel: userData.sustainLevel || 0.5,
-      frequencySmoothing: userData.frequencySmoothing || 0,
-      amplitudeSmoothing: userData.amplitudeSmoothing || 0,
-      adsOn: userData.adsOn || false,
-      waveform: userData.waveform || "sine",
-      customWaveform: userData.customWaveform || null,
+      frequency: userData.frequency || defaultParams.frequency,
+      amplitude: userData.amplitude || defaultParams.amplitude,
+      attackTime: userData.attackTime || defaultParams.attackTime,
+      decayTime: userData.decayTime || defaultParams.decayTime,
+      sustainLevel: userData.sustainLevel || defaultParams.sustainLevel,
+      frequencySmoothing:
+        userData.frequencySmoothing || defaultParams.frequencySmoothing,
+      amplitudeSmoothing:
+        userData.amplitudeSmoothing || defaultParams.amplitudeSmoothing,
+      adsOn: userData.adsOn || defaultParams.adsOn,
+      waveform: userData.waveform || defaultParams.waveform,
+      customWaveform: userData.customWaveform || defaultParams.customWaveform,
     };
   });
 
@@ -352,16 +368,22 @@ maxApi.addHandler("getUserByNumber", (userNumber) => {
     const userData = {
       socketId: socketId,
       id: oscUsers[socketId].id,
-      frequency: oscUsers[socketId].frequency || 440,
-      amplitude: oscUsers[socketId].amplitude || 0.5,
-      attackTime: oscUsers[socketId].attackTime || 0.1,
-      decayTime: oscUsers[socketId].decayTime || 0.1,
-      sustainLevel: oscUsers[socketId].sustainLevel || 0.5,
-      frequencySmoothing: oscUsers[socketId].frequencySmoothing || 0.1,
-      amplitudeSmoothing: oscUsers[socketId].amplitudeSmoothing || 0.1,
-      adsOn: oscUsers[socketId].adsOn || false,
-      waveform: oscUsers[socketId].waveform || "sine",
-      customWaveform: oscUsers[socketId].customWaveform || null,
+      frequency: oscUsers[socketId].frequency || defaultParams.frequency,
+      amplitude: oscUsers[socketId].amplitude || defaultParams.amplitude,
+      attackTime: oscUsers[socketId].attackTime || defaultParams.attackTime,
+      decayTime: oscUsers[socketId].decayTime || defaultParams.decayTime,
+      sustainLevel:
+        oscUsers[socketId].sustainLevel || defaultParams.sustainLevel,
+      frequencySmoothing:
+        oscUsers[socketId].frequencySmoothing ||
+        defaultParams.frequencySmoothing,
+      amplitudeSmoothing:
+        oscUsers[socketId].amplitudeSmoothing ||
+        defaultParams.amplitudeSmoothing,
+      adsOn: oscUsers[socketId].adsOn || defaultParams.adsOn,
+      waveform: oscUsers[socketId].waveform || defaultParams.waveform,
+      customWaveform:
+        oscUsers[socketId].customWaveform || defaultParams.customWaveform,
     };
 
     maxApi.outlet("userData", userData);
@@ -381,22 +403,14 @@ maxApi.addHandler("setParameterByNumber", (userNumber, param, value) => {
   if (index >= 0 && index < socketIds.length) {
     const socketId = socketIds[index];
 
-    // Validate waveform parameter
-    if (param === "waveform" && !WAVEFORM_TYPES[value]) {
-      console.log(`Invalid waveform type: ${value}`);
-      maxApi.outlet("error", `Invalid waveform type: ${value}`);
+    const result = setParametersForClients({ [param]: value }, [socketId]);
+    if (result.errors.length > 0) {
+      console.error(
+        `Parameter error for user ${userNumber}: ${result.errors[0].error}`,
+      );
+      maxApi.outlet("parameterError", result.errors[0]);
       return false;
     }
-
-    // Update user data
-    oscUsers[socketId][param] = value;
-    users[socketId][param] = value;
-
-    // Emit to specific client
-    io.to(socketId).emit(param, value);
-
-    // Update dashboard
-    updateClientListOutlet();
 
     maxApi.outlet("parameterSet", { userNumber, param, value });
     return true;
@@ -412,16 +426,22 @@ maxApi.addHandler("getUser", (socketId) => {
   if (oscUsers[socketId]) {
     const userData = {
       id: oscUsers[socketId].id,
-      frequency: oscUsers[socketId].frequency || 440,
-      amplitude: oscUsers[socketId].amplitude || 0.5,
-      attackTime: oscUsers[socketId].attackTime || 0.1,
-      decayTime: oscUsers[socketId].decayTime || 0.1,
-      sustainLevel: oscUsers[socketId].sustainLevel || 0.5,
-      frequencySmoothing: oscUsers[socketId].frequencySmoothing || 0.1,
-      amplitudeSmoothing: oscUsers[socketId].amplitudeSmoothing || 0.1,
-      adsOn: oscUsers[socketId].adsOn || false,
-      waveform: oscUsers[socketId].waveform || "sine",
-      customWaveform: oscUsers[socketId].customWaveform || null,
+      frequency: oscUsers[socketId].frequency || defaultParams.frequency,
+      amplitude: oscUsers[socketId].amplitude || defaultParams.amplitude,
+      attackTime: oscUsers[socketId].attackTime || defaultParams.attackTime,
+      decayTime: oscUsers[socketId].decayTime || defaultParams.decayTime,
+      sustainLevel:
+        oscUsers[socketId].sustainLevel || defaultParams.sustainLevel,
+      frequencySmoothing:
+        oscUsers[socketId].frequencySmoothing ||
+        defaultParams.frequencySmoothing,
+      amplitudeSmoothing:
+        oscUsers[socketId].amplitudeSmoothing ||
+        defaultParams.amplitudeSmoothing,
+      adsOn: oscUsers[socketId].adsOn || defaultParams.adsOn,
+      waveform: oscUsers[socketId].waveform || defaultParams.waveform,
+      customWaveform:
+        oscUsers[socketId].customWaveform || defaultParams.customWaveform,
     };
 
     maxApi.outlet("userData", userData);
@@ -445,13 +465,18 @@ maxApi.addHandler("setDebugMode", (mode) => {
 maxApi.addHandler("debug", () => {
   const oscClientCount = Object.keys(oscUsers).length;
   const allClientCount = Object.keys(users).length;
+  const waveformTypes = PARAMETER_SCHEMA.waveform
+    ? PARAMETER_SCHEMA.waveform.values
+    : [];
+
   console.log("=== DEBUG INFO ===");
   console.log("Debug Mode:", debugMode);
   console.log("OSC Clients:", Object.keys(oscUsers));
   console.log("All Clients:", Object.keys(users));
   console.log("OSC Client Count:", oscClientCount);
   console.log("All Client Count:", allClientCount);
-  console.log("Available Waveforms:", Object.keys(WAVEFORM_TYPES));
+  console.log("Available Waveforms:", waveformTypes);
+  console.log("Parameter Schema:", Object.keys(PARAMETER_SCHEMA));
 
   // Send debug info to Max
   maxApi.outlet("debug", {
@@ -459,51 +484,32 @@ maxApi.addHandler("debug", () => {
     oscClients: Object.keys(oscUsers),
     oscCount: oscClientCount,
     allCount: allClientCount,
-    waveformTypes: Object.keys(WAVEFORM_TYPES),
+    waveformTypes: waveformTypes,
+    parameters: Object.keys(PARAMETER_SCHEMA),
   });
 
   return { debugMode, oscCount: oscClientCount, allCount: allClientCount };
 });
 
-// Update your parameter emission function to work with OSC-specific targeting
-function emitParamToOSC(param, value, clientId) {
-  if (clientId && oscUsers[clientId]) {
-    io.to(clientId).emit(param, value);
-  } else {
-    // Emit to all OSC clients
-    Object.keys(oscUsers).forEach((socketId) => {
-      io.to(socketId).emit(param, value);
-    });
-  }
-}
-
 // Enhanced OSC-specific parameter handler
 maxApi.addHandler("setOSCParameter", (param, value, clientId) => {
-  // Validate waveform parameter
-  if (param === "waveform" && !WAVEFORM_TYPES[value]) {
-    console.log(`Invalid waveform type: ${value}`);
-    maxApi.outlet("error", `Invalid waveform type: ${value}`);
+  // Determine target clients (only OSC clients)
+  let targetClients = [];
+  if (clientId && oscUsers[clientId]) {
+    targetClients = [clientId];
+  } else {
+    targetClients = Object.keys(oscUsers);
+  }
+
+  const result = setParametersForClients(
+    { [param]: value },
+    targetClients.length ? targetClients : null,
+  );
+  if (result.errors.length > 0) {
+    console.error(`OSC Parameter error: ${result.errors[0].error}`);
+    maxApi.outlet("parameterError", result.errors[0]);
     return false;
   }
-
-  // Update global default if no clientId
-  if (!clientId) defaultParams[param] = value;
-
-  // Update specific client data if clientId provided
-  if (clientId && oscUsers[clientId]) {
-    oscUsers[clientId][param] = value;
-  } else {
-    // Update all OSC users
-    Object.keys(oscUsers).forEach((socketId) => {
-      oscUsers[socketId][param] = value;
-    });
-  }
-
-  // Emit only to OSC clients
-  emitParamToOSC(param, value, clientId);
-
-  // Update web dashboard
-  updateClientListOutlet();
 
   console.log(
     `OSC Parameter "${param}" set to ${value} ${clientId ? `for OSC client ${clientId}` : "for all OSC clients"}`,
@@ -554,15 +560,21 @@ io.on("connection", (socket) => {
     console.log("Regular client connected:", userId);
   }
 
-  // Send initial params including waveform
-  Object.entries(defaultParams).forEach(([param, value]) => {
-    socket.emit(param, value);
-  });
+  // Send initial params using bulk update
+  socket.emit("setParameters", defaultParams);
   socket.emit("setUserId", userId);
   socket.emit("clientType", isOSCClient ? "osc" : "regular");
 
   // Send available waveform types
-  socket.emit("waveformTypes", Object.keys(WAVEFORM_TYPES));
+  const waveformTypes = PARAMETER_SCHEMA.waveform
+    ? PARAMETER_SCHEMA.waveform.values
+    : [];
+  socket.emit("waveformTypes", waveformTypes);
+
+  // Handle parameter schema requests
+  socket.on("getParameterSchema", () => {
+    socket.emit("parameterSchema", PARAMETER_SCHEMA);
+  });
 
   socket.on("disconnect", () => {
     const wasOSCClient = users[socket.id]?.isOSCClient;
@@ -583,10 +595,10 @@ io.on("connection", (socket) => {
 // Optional: Add a periodic update every few seconds as backup
 setInterval(() => {
   updateClientListOutlet();
-}, 5000); // Update every 5000 milliseconds
+}, CONFIG.CLIENT_LIST_UPDATE_INTERVAL);
 
 app.use(express.static(__dirname));
 
-server.listen(8000, () =>
-  console.log("Server running on http://localhost:8000"),
+server.listen(CONFIG.SERVER_PORT, () =>
+  console.log(`Server running on http://localhost:${CONFIG.SERVER_PORT}`),
 );
