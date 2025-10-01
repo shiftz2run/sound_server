@@ -14,18 +14,6 @@
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
 				"box" : 				{
-					"id" : "obj-60",
-					"maxclass" : "newobj",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "signal" ],
-					"patching_rect" : [ 1069.0, 297.0, 41.0, 22.0 ],
-					"text" : "sig~ 1"
-				}
-
-			}
-, 			{
-				"box" : 				{
 					"id" : "obj-59",
 					"maxclass" : "dict.view",
 					"numinlets" : 1,
@@ -817,7 +805,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "jit_matrix" ],
 									"patching_rect" : [ 437.57478541135788, 130.351686477661133, 287.610642611980438, 287.610642611980438 ],
-									"pic" : "Macintosh HD:/Users/noeorlando/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/qr.png"
+									"pic" : "notfound"
 								}
 
 							}
@@ -949,8 +937,6 @@
 										"args" : [ 8000, "osc.html", 5000 ],
 										"autostart" : 0,
 										"defer" : 0,
-										"node_bin_path" : "",
-										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,
@@ -1156,7 +1142,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "jit_matrix" ],
 					"patching_rect" : [ 1472.0, -471.0, 358.0, 358.0 ],
-					"pic" : "Macintosh HD:/Users/noeorlando/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/qr.png"
+					"pic" : "notfound"
 				}
 
 			}
@@ -1940,14 +1926,17 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
 					"text" : "node.script server.js @watch 1",
 					"textfile" : 					{
+						"text" : "",
 						"filename" : "server.js",
 						"flags" : 0,
-						"embed" : 0,
+						"embed" : 1,
 						"autowatch" : 1
 					}
 
@@ -2383,43 +2372,43 @@
  ],
 		"dependency_cache" : [ 			{
 				"name" : "ARP-NineWaveSynth.wav",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/soundfiles",
-				"patcherrelativepath" : "./soundfiles",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
+				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "ARPEGGIO-NewAgeHarp.wav",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/soundfiles",
-				"patcherrelativepath" : "./soundfiles",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
+				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "AlKooper-TheLandlord.wav",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/soundfiles",
-				"patcherrelativepath" : "./soundfiles",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
+				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "EPIANO-SoftRhodezChord5.wav",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/soundfiles",
-				"patcherrelativepath" : "./soundfiles",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
+				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "REPAIR~1.WAV",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/soundfiles",
-				"patcherrelativepath" : "./soundfiles",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
+				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "STAB-DXinna.wav",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/soundfiles",
-				"patcherrelativepath" : "./soundfiles",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
+				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
 				"implicit" : 1
 			}
@@ -2437,23 +2426,9 @@
 			}
 , 			{
 				"name" : "pfft.maxbins.maxpat",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
-				"implicit" : 1
-			}
-, 			{
-				"name" : "qr.png",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server",
-				"patcherrelativepath" : ".",
-				"type" : "PNG",
-				"implicit" : 1
-			}
-, 			{
-				"name" : "qrcodegen.js",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server",
-				"patcherrelativepath" : ".",
-				"type" : "TEXT",
 				"implicit" : 1
 			}
 , 			{
@@ -2463,44 +2438,37 @@
 				"implicit" : 1
 			}
 , 			{
-				"name" : "server.js",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server",
-				"patcherrelativepath" : ".",
-				"type" : "TEXT",
-				"implicit" : 1
-			}
-, 			{
 				"name" : "setFFTData.maxpat",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/Max/Parameter",
-				"patcherrelativepath" : "./Max/Parameter",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max/parameter",
+				"patcherrelativepath" : "./parameter",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "setParameter.maxpat",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/Max/Parameter",
-				"patcherrelativepath" : "./Max/Parameter",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max/parameter",
+				"patcherrelativepath" : "./parameter",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "setParameterList.maxpat",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/Max/Parameter",
-				"patcherrelativepath" : "./Max/Parameter",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max/parameter",
+				"patcherrelativepath" : "./parameter",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "setParameterRouter.maxpat",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/Max/Parameter",
-				"patcherrelativepath" : "./Max/Parameter",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max/parameter",
+				"patcherrelativepath" : "./parameter",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "setParameters.maxpat",
-				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/Max/Parameter",
-				"patcherrelativepath" : "./Max/Parameter",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max/parameter",
+				"patcherrelativepath" : "./parameter",
 				"type" : "JSON",
 				"implicit" : 1
 			}
