@@ -28,9 +28,9 @@ inlets = 2;
 outlets = 1;
 
 /**
- * Inlet handlers
+ * Inlet handlers - accepts floats or lists
  */
-function list() {
+function anything() {
   if (inlet == 0) {
     freqs = arrayfromargs(arguments);
     // Left inlet triggers output
