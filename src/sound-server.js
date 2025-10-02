@@ -519,7 +519,7 @@ maxApi.addHandler("setOSCParameter", (param, value, clientId) => {
 });
 
 // ===== Static Files =====
-app.use(express.static(path.join(__dirname, "..")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // ===== Socket connection =====
 io.on("connection", (socket) => {
