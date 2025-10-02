@@ -48,22 +48,22 @@ const PARAMETER_SCHEMA = {
     type: "number",
     min: 0,
     max: undefined,
-    default: 0.1,
-    unit: "s",
+    default: 100,
+    unit: "ms",
     category: "envelope",
     requiresRestart: false,
-    description: "Attack time for envelope",
+    description: "Attack time for envelope in milliseconds",
   },
 
   decayTime: {
     type: "number",
     min: 0,
     max: undefined,
-    default: 0.1,
-    unit: "s",
+    default: 100,
+    unit: "ms",
     category: "envelope",
     requiresRestart: false,
-    description: "Decay time for envelope",
+    description: "Decay time for envelope in milliseconds",
   },
 
   sustainLevel: {
