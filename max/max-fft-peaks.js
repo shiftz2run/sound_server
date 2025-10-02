@@ -20,8 +20,9 @@
  *
  * Parameters:
  *   @N (int) - Number of peaks to find (default: 10)
- *   @sorted (int) - 0 = pure quickselect (fast, unordered)
- *                   1 = hybrid (quickselect + sort top N for ordered output)
+ *   @sorted (int) - 0 = no sort (pure quickselect, unordered, fastest)
+ *                   1 = sort by magnitude (descending, largest first)
+ *                   2 = sort by frequency (ascending, lowest first)
  *   @samplerate (float) - Sample rate in Hz (default: 44100)
  *   @fftsize (int) - FFT size for frequency conversion (default: 0 = auto-detect as magnitudes.length * 2)
  */
@@ -108,8 +109,9 @@ function quickselect(arr, indices, left, right, k) {
 
 /**
  * Find top N peaks from FFT magnitude data
- * Mode 1: Pure quickselect (fastest, O(n), unordered results)
- * Mode 2: Hybrid (quickselect + sort top N, O(n) + O(N log N), ordered results)
+ * Mode 0: Pure quickselect (fastest, O(n), unordered results)
+ * Mode 1: Quickselect + sort by magnitude (O(n) + O(N log N), descending)
+ * Mode 2: Quickselect + sort by frequency (O(n) + O(N log N), ascending)
  */
 function findTopNPeaks(magnitudes, numPeaks, sortResults) {
   var len = magnitudes.length;
@@ -141,14 +143,29 @@ function findTopNPeaks(magnitudes, numPeaks, sortResults) {
     quickselect(mags, bins, 0, len - 1, numPeaks - 1);
   }
 
-  if (sortResults) {
-    // Hybrid mode: Sort the top N results by magnitude (descending)
+  if (sortResults === 1) {
+    // Sort by magnitude (descending, largest first)
     var pairs = [];
     for (var i = 0; i < numPeaks; i++) {
       pairs.push({ bin: bins[i], mag: mags[i] });
     }
     pairs.sort(function (a, b) {
       return b.mag - a.mag;
+    });
+
+    // Update bins and mags arrays in-place with sorted results
+    for (var i = 0; i < numPeaks; i++) {
+      bins[i] = pairs[i].bin;
+      mags[i] = pairs[i].mag;
+    }
+  } else if (sortResults === 2) {
+    // Sort by frequency (ascending, lowest first) - sort by bin number
+    var pairs = [];
+    for (var i = 0; i < numPeaks; i++) {
+      pairs.push({ bin: bins[i], mag: mags[i] });
+    }
+    pairs.sort(function (a, b) {
+      return a.bin - b.bin;
     });
 
     // Update bins and mags arrays in-place with sorted results
@@ -200,8 +217,9 @@ function msg_int(n) {
  * Message handler for setting sorted mode
  */
 function sorted(f) {
-  sorted = f !== 0 ? 1 : 0;
-  post("sorted mode set to " + sorted + "\n");
+  sorted = Math.max(0, Math.min(2, Math.floor(f)));
+  var modeText = ["no sort", "sort by magnitude", "sort by frequency"][sorted];
+  post("sorted mode set to " + sorted + " (" + modeText + ")\n");
 }
 
 /**
@@ -228,7 +246,7 @@ function setN(n) {
 }
 
 function setSorted(s) {
-  sorted = s !== 0 ? 1 : 0;
+  sorted = Math.max(0, Math.min(2, Math.floor(s)));
 }
 
 function setSamplerate(sr) {
