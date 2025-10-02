@@ -20,9 +20,9 @@ inlets = 1;
 outlets = 1;
 
 /**
- * Main list handler - receives values and outputs normalized version
+ * Main input handler - receives values (float or list) and outputs normalized version
  */
-function list() {
+function anything() {
   var values = arrayfromargs(arguments);
 
   if (values.length === 0) {
