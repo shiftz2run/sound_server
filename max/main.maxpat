@@ -805,7 +805,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "jit_matrix" ],
 									"patching_rect" : [ 437.57478541135788, 130.351686477661133, 287.610642611980438, 287.610642611980438 ],
-									"pic" : "notfound"
+									"pic" : "Macintosh HD:/Users/noeorlando/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/qr.png"
 								}
 
 							}
@@ -937,6 +937,8 @@
 										"args" : [ 8000, "osc.html", 5000 ],
 										"autostart" : 0,
 										"defer" : 0,
+										"node_bin_path" : "",
+										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,
@@ -1142,7 +1144,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "jit_matrix" ],
 					"patching_rect" : [ 1472.0, -471.0, 358.0, 358.0 ],
-					"pic" : "notfound"
+					"pic" : "Macintosh HD:/Users/noeorlando/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/qr.png"
 				}
 
 			}
@@ -1922,7 +1924,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 874.0, 648.0, 172.0, 22.0 ],
+					"patching_rect" : [ 874.0, 648.0, 209.0, 22.0 ],
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
@@ -1931,12 +1933,11 @@
 						"watch" : 1
 					}
 ,
-					"text" : "node.script server.js @watch 1",
+					"text" : "node.script sound-server.js @watch 1",
 					"textfile" : 					{
-						"text" : "",
-						"filename" : "server.js",
+						"filename" : "sound-server.js",
 						"flags" : 0,
-						"embed" : 1,
+						"embed" : 0,
 						"autowatch" : 1
 					}
 
@@ -2419,6 +2420,27 @@
 				"implicit" : 1
 			}
 , 			{
+				"name" : "max-fft-combine.js",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
+				"patcherrelativepath" : ".",
+				"type" : "TEXT",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "max-fft-peaks.js",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
+				"patcherrelativepath" : ".",
+				"type" : "TEXT",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "max-normalize.js",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
+				"patcherrelativepath" : ".",
+				"type" : "TEXT",
+				"implicit" : 1
+			}
+, 			{
 				"name" : "n4m.monitor.maxpat",
 				"bootpath" : "C74:/packages/Node for Max/patchers/debug-monitor",
 				"type" : "JSON",
@@ -2429,6 +2451,20 @@
 				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "qr.png",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets",
+				"patcherrelativepath" : "../assets",
+				"type" : "PNG",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "qrcodegen.js",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/src/services",
+				"patcherrelativepath" : "../src/services",
+				"type" : "TEXT",
 				"implicit" : 1
 			}
 , 			{
@@ -2470,6 +2506,13 @@
 				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max/parameter",
 				"patcherrelativepath" : "./parameter",
 				"type" : "JSON",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "sound-server.js",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/src",
+				"patcherrelativepath" : "../src",
+				"type" : "TEXT",
 				"implicit" : 1
 			}
  ],
