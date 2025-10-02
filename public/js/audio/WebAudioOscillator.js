@@ -17,9 +17,9 @@ class WebAudioOscillator {
     this.frequencySmoothing = 0;
     this.amplitudeSmoothing = 0;
 
-    // Envelope
-    this.attackTime = 0.01;
-    this.decayTime = 0.1;
+    // Envelope (stored internally in seconds for Web Audio API)
+    this.attackTime = 0.1; // 100ms default
+    this.decayTime = 0.1; // 100ms default
     this.sustainLevel = 0.5;
     this.adsOn = false;
 
@@ -128,11 +128,14 @@ class WebAudioOscillator {
       return;
     }
 
+    // Apply ADS envelope using times in seconds (already converted from ms in setters)
+    // Attack: ramp from 0 to full amplitude
     this.gainNode.gain.setValueAtTime(0, now);
     this.gainNode.gain.linearRampToValueAtTime(
       this.amplitude,
       now + this.attackTime,
     );
+    // Decay: exponentially approach sustain level
     this.gainNode.gain.setTargetAtTime(
       this.sustainLevel * this.amplitude,
       now + this.attackTime,
@@ -212,11 +215,13 @@ class WebAudioOscillator {
   }
 
   setAttackTime(value) {
-    this.attackTime = value;
+    // Convert milliseconds to seconds for Web Audio API
+    this.attackTime = value / 1000;
   }
 
   setDecayTime(value) {
-    this.decayTime = value;
+    // Convert milliseconds to seconds for Web Audio API
+    this.decayTime = value / 1000;
   }
 
   setSustainLevel(value) {
