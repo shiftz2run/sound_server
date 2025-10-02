@@ -1,25 +1,29 @@
 /**
  * max-fft-peaks.js
  *
- * Find the N maximum magnitudes with bin numbers from FFT analysis data
+ * Find the N maximum magnitudes with frequencies from FFT analysis data
  * using the Quickselect algorithm for O(n) average-case performance.
  *
  * Usage:
- *   [js max-fft-peaks.js @N 10 @sorted 0]
+ *   [js max-fft-peaks.js @N 10 @sorted 0 @samplerate 44100 @fftsize 0]
  *
  * Inlets:
  *   0: list - FFT magnitude data (index = bin number)
  *      int - set N parameter (number of peaks to find)
  *      message "sorted 0/1" - toggle sorting mode
+ *      message "samplerate <sr>" - set sample rate in Hz
+ *      message "fftsize <size>" - set FFT size (0 = auto-detect)
  *
  * Outlets:
- *   0: list - [bin1, bin2, ..., binN] (bin numbers only)
+ *   0: list - [freq1, freq2, ..., freqN] (frequencies in Hz)
  *   1: list - [mag1, mag2, ..., magN] (magnitudes only)
  *
  * Parameters:
  *   @N (int) - Number of peaks to find (default: 10)
  *   @sorted (int) - 0 = pure quickselect (fast, unordered)
  *                   1 = hybrid (quickselect + sort top N for ordered output)
+ *   @samplerate (float) - Sample rate in Hz (default: 44100)
+ *   @fftsize (int) - FFT size for frequency conversion (default: 0 = auto-detect as magnitudes.length * 2)
  */
 
 autowatch = 1;
@@ -27,6 +31,8 @@ autowatch = 1;
 // Parameters
 var N = 0;
 var sorted = 0;
+var samplerate = 44100;
+var fftsize = 0;
 
 // Cache for bin indices to avoid regeneration when FFT size stays constant
 var cachedBins = [];
@@ -160,13 +166,26 @@ function findTopNPeaks(magnitudes, numPeaks, sortResults) {
 }
 
 /**
+ * Convert bin numbers to frequencies in Hz
+ */
+function binsToFreqs(bins, fftLen) {
+  var effectiveFftSize = fftsize > 0 ? fftsize : fftLen * 2;
+  var freqs = [];
+  for (var i = 0; i < bins.length; i++) {
+    freqs.push((bins[i] * samplerate) / effectiveFftSize);
+  }
+  return freqs;
+}
+
+/**
  * Main list handler - receives FFT magnitude data
  */
 function list() {
   var magnitudes = arrayfromargs(arguments);
   var peaks = findTopNPeaks(magnitudes, N, sorted);
+  var freqs = binsToFreqs(peaks.bins, magnitudes.length);
   outlet(1, peaks.mags); // Output magnitudes to outlet 1 (right outlet)
-  outlet(0, peaks.bins); // Output bins to outlet 0 (left outlet)
+  outlet(0, freqs); // Output frequencies to outlet 0 (left outlet)
 }
 
 /**
@@ -186,6 +205,22 @@ function sorted(f) {
 }
 
 /**
+ * Message handler for setting sample rate
+ */
+function samplerate(sr) {
+  samplerate = Math.max(1, sr);
+  post("samplerate set to " + samplerate + " Hz\n");
+}
+
+/**
+ * Message handler for setting FFT size
+ */
+function fftsize(size) {
+  fftsize = Math.max(0, size);
+  post("fftsize set to " + (fftsize === 0 ? "auto-detect" : fftsize) + "\n");
+}
+
+/**
  * Attribute setters
  */
 function setN(n) {
@@ -194,6 +229,14 @@ function setN(n) {
 
 function setSorted(s) {
   sorted = s !== 0 ? 1 : 0;
+}
+
+function setSamplerate(sr) {
+  samplerate = Math.max(1, sr);
+}
+
+function setFftsize(size) {
+  fftsize = Math.max(0, size);
 }
 
 /**
@@ -207,6 +250,16 @@ function getSorted() {
   return sorted;
 }
 
+function getSamplerate() {
+  return samplerate;
+}
+
+function getFftsize() {
+  return fftsize;
+}
+
 // Register attributes
 setN.local = 1;
 setSorted.local = 1;
+setSamplerate.local = 1;
+setFftsize.local = 1;
