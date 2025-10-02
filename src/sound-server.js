@@ -163,8 +163,8 @@ function setFFTDataForClients(
   const fftPairs = [];
   for (let i = 0; i < fftDataArray.length; i += 2) {
     fftPairs.push({
-      amplitude: fftDataArray[i],
-      frequency: fftDataArray[i + 1],
+      frequency: fftDataArray[i],
+      amplitude: fftDataArray[i + 1],
     });
   }
 
