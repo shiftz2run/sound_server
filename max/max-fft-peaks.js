@@ -19,7 +19,7 @@
  *   1: list - [mag1, mag2, ..., magN] (magnitudes only)
  *
  * Parameters:
- *   @N (int) - Number of peaks to find (default: 10)
+ *   @N (int) - Number of peaks to find (default: 0)
  *   @sorted (int) - 0 = no sort (pure quickselect, unordered, fastest)
  *                   1 = sort by magnitude (descending, largest first)
  *                   2 = sort by frequency (ascending, lowest first)
