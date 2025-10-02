@@ -13,7 +13,8 @@
  *      message "sorted 0/1" - toggle sorting mode
  *
  * Outlets:
- *   0: list - [bin1, mag1, bin2, mag2, ..., binN, magN]
+ *   0: list - [bin1, bin2, ..., binN] (bin numbers only)
+ *   1: list - [mag1, mag2, ..., magN] (magnitudes only)
  *
  * Parameters:
  *   @N (int) - Number of peaks to find (default: 10)
@@ -33,7 +34,7 @@ var cachedLength = 0;
 
 // Declare inlets and outlets
 inlets = 1;
-outlets = 1;
+outlets = 2;
 
 /**
  * Swap elements at indices i and j in both arrays
@@ -134,9 +135,6 @@ function findTopNPeaks(magnitudes, numPeaks, sortResults) {
     quickselect(mags, bins, 0, len - 1, numPeaks - 1);
   }
 
-  // Extract top N results
-  var results = [];
-
   if (sortResults) {
     // Hybrid mode: Sort the top N results by magnitude (descending)
     var pairs = [];
@@ -147,19 +145,18 @@ function findTopNPeaks(magnitudes, numPeaks, sortResults) {
       return b.mag - a.mag;
     });
 
+    // Update bins and mags arrays in-place with sorted results
     for (var i = 0; i < numPeaks; i++) {
-      results.push(pairs[i].bin);
-      results.push(pairs[i].mag);
-    }
-  } else {
-    // Pure quickselect mode: Return unsorted results (fastest)
-    for (var i = 0; i < numPeaks; i++) {
-      results.push(bins[i]);
-      results.push(mags[i]);
+      bins[i] = pairs[i].bin;
+      mags[i] = pairs[i].mag;
     }
   }
 
-  return results;
+  // Trim arrays to numPeaks length
+  bins.length = numPeaks;
+  mags.length = numPeaks;
+
+  return { bins, mags };
 }
 
 /**
@@ -168,7 +165,8 @@ function findTopNPeaks(magnitudes, numPeaks, sortResults) {
 function list() {
   var magnitudes = arrayfromargs(arguments);
   var peaks = findTopNPeaks(magnitudes, N, sorted);
-  outlet(0, peaks);
+  outlet(1, peaks.mags); // Output magnitudes to outlet 1 (right outlet)
+  outlet(0, peaks.bins); // Output bins to outlet 0 (left outlet)
 }
 
 /**
