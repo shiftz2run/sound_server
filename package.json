@@ -10,10 +10,7 @@
   },
   "dependencies": {
     "@types/max-api": "^2.0.3",
-    "adsr-envelope": "^1.0.0",
-    "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
-    "osc": "^2.4.5",
     "qrcode": "^1.5.4",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0"
