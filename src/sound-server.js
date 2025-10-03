@@ -235,6 +235,7 @@ registerMaxHandlers(
   setParametersForClients,
   setParametersListForClients,
   setFFTDataForClients,
+  io,
 );
 
 // Fixed debug mode handler

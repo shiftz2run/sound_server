@@ -67,10 +67,13 @@ function registerAdditionalSocketListeners(socket, oscillator) {
     console.log("Client type:", type);
   });
 
-  socket.on("noteOn", () => {
-    console.log("Note on trigger");
+  socket.on("noteOn", (params = null) => {
+    console.log(
+      "Note on trigger",
+      params ? `with params: ${JSON.stringify(params)}` : "",
+    );
     if (oscillator) {
-      oscillator.triggerNote();
+      oscillator.triggerNote(params);
     }
   });
 
