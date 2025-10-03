@@ -192,6 +192,11 @@ class WebAudioOscillator {
   // Parameter setters
   setFrequency(value) {
     this.targetFrequency = value;
+
+    // Trigger ADS envelope when frequency is set and adsOn is true
+    if (this.adsOn && this.isStarted) {
+      this.applyADS();
+    }
   }
 
   setAmplitude(value) {
