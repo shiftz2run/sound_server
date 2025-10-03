@@ -86,6 +86,17 @@ const PARAMETER_SCHEMA = {
     description: "Enable/disable ADS envelope",
   },
 
+  adsTriggerMode: {
+    type: "enum",
+    values: ["auto", "manual"],
+    default: "manual",
+    unit: undefined,
+    category: "envelope",
+    requiresRestart: false,
+    description:
+      "ADS trigger mode: 'auto' triggers on frequency changes, 'manual' requires explicit trigger",
+  },
+
   // === SMOOTHING PARAMETERS ===
   frequencySmoothing: {
     type: "number",

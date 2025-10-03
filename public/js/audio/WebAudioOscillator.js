@@ -22,6 +22,7 @@ class WebAudioOscillator {
     this.decayTime = 0.1; // 100ms default
     this.sustainLevel = 0.5;
     this.adsOn = false;
+    this.adsTriggerMode = "manual";
 
     this.availableWaveforms = [
       "sine",
@@ -193,8 +194,8 @@ class WebAudioOscillator {
   setFrequency(value) {
     this.targetFrequency = value;
 
-    // Trigger ADS envelope when frequency is set and adsOn is true
-    if (this.adsOn && this.isStarted) {
+    // Trigger ADS envelope when frequency is set, adsOn is true, AND mode is auto
+    if (this.adsOn && this.isStarted && this.adsTriggerMode === "auto") {
       this.applyADS();
     }
   }
@@ -248,6 +249,10 @@ class WebAudioOscillator {
     this.amplitudeSmoothing = value;
   }
 
+  setAdsTriggerMode(value) {
+    this.adsTriggerMode = value;
+  }
+
   // Utility method to update multiple parameters at once
   updateParameters(params) {
     for (const [key, value] of Object.entries(params)) {
@@ -258,8 +263,13 @@ class WebAudioOscillator {
     }
   }
 
-  triggerNote() {
+  triggerNote(params = null) {
     if (this.isStarted) {
+      // If parameters are provided, update them first
+      if (params && typeof params === "object") {
+        this.updateParameters(params);
+      }
+      // Then trigger the ADS envelope
       this.applyADS();
     }
   }

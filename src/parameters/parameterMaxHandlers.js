@@ -9,6 +9,7 @@ function registerMaxHandlers(
   setParametersForClients,
   setParametersListForClients,
   setFFTDataForClients,
+  io,
 ) {
   // Auto-generate all Max handlers
   Object.keys(PARAMETER_SCHEMA).forEach((param) => {
@@ -50,6 +51,32 @@ function registerMaxHandlers(
   maxApi.addHandler("setFFTData", (paramDict) => {
     const { values, mode = "beginning", clientIds = null } = paramDict;
     return setFFTDataForClients(values, mode, clientIds ? [clientIds] : null);
+  });
+
+  // Note trigger handler - paramDict: { frequency?: <value>, amplitude?: <value>, ..., clientIds?: <optional> }
+  // Optionally updates parameters before triggering the note
+  maxApi.addHandler("noteOn", (paramDict = {}) => {
+    const { clientIds, ...params } = paramDict;
+
+    console.log(
+      `noteOn(params=${JSON.stringify(params)}, clientIds=${clientIds || "all"})`,
+    );
+
+    // If parameters are provided, update them first
+    if (Object.keys(params).length > 0) {
+      setParametersForClients(params, clientIds ? [clientIds] : null);
+    }
+
+    // Send noteOn event to trigger envelope
+    if (!clientIds) {
+      // Emit to all clients
+      io.emit("noteOn", params);
+    } else {
+      // Emit to specific client
+      io.to(clientIds).emit("noteOn", params);
+    }
+
+    return { triggered: true, clients: clientIds || "all", params };
   });
 }
 
