@@ -39,22 +39,7 @@ function initAudio() {
   return true;
 }
 
-// Update display function (optional - for debugging)
-function updateDisplay() {
-  if (oscillator) {
-    console.log(
-      `User: ${userId}, Freq: ${oscillator.frequency.toFixed(1)}, Amp: ${oscillator.amplitude.toFixed(3)}, Waveform: ${oscillator.currentWaveform}`,
-    );
-  }
-}
-
-// Optional: Send parameter changes back to server
-function sendParameterToServer(param, value) {
-  socket.emit("parameterChange", { param, value, userId });
-}
-
-// Expose oscillator directly for debugging/manual control
+// Expose oscillator for debugging/manual control
 window.audioControl = {
-  updateDisplay,
   getOscillator: () => oscillator,
 };
