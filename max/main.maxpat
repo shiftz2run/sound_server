@@ -1128,6 +1128,8 @@
 										"args" : [ 8000, "osc.html", 5000 ],
 										"autostart" : 0,
 										"defer" : 0,
+										"node_bin_path" : "",
+										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,
@@ -1854,8 +1856,8 @@
 					"numinlets" : 6,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 1268.918834209442139, 256.756739616394043, 130.0, 22.0 ],
-					"text" : "scale 0 128 100. 1000."
+					"patching_rect" : [ 1268.918834209442139, 256.756739616394043, 97.0, 22.0 ],
+					"text" : "scale 0 128 0. 1."
 				}
 
 			}
@@ -1878,8 +1880,8 @@
 					"numinlets" : 6,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 1147.297220706939697, 256.756739616394043, 130.0, 22.0 ],
-					"text" : "scale 0 128 100. 1000."
+					"patching_rect" : [ 1147.297220706939697, 256.756739616394043, 117.0, 22.0 ],
+					"text" : "scale 0 128 0. 1000."
 				}
 
 			}
@@ -1902,8 +1904,8 @@
 					"numinlets" : 6,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 1020.270202159881592, 256.756739616394043, 130.0, 22.0 ],
-					"text" : "scale 0 128 100. 1000."
+					"patching_rect" : [ 1020.270202159881592, 256.756739616394043, 117.0, 22.0 ],
+					"text" : "scale 0 128 0. 1000."
 				}
 
 			}
@@ -2117,6 +2119,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
