@@ -39,9 +39,10 @@ function registerMaxHandlers(
     });
   });
 
-  // Manual parameters handler - paramDict: { value: <params_object>, clientIds?: <optional> }
+  // Manual parameters handler - paramDict: { frequency?: <value>, amplitude?: <value>, ..., clientIds?: <optional> }
+  // All parameter keys are passed directly in the dict, clientIds is extracted if present
   maxApi.addHandler("setParameters", (paramDict) => {
-    const { value: params, clientIds = null } = paramDict;
+    const { clientIds, ...params } = paramDict;
     return setParametersForClients(params, clientIds ? [clientIds] : null);
   });
 
