@@ -202,16 +202,8 @@ function updateClientListOutlet() {
   maxApi.outlet(clientCount); // Send just the number directly
 
   // Send full user data object to Max for dashboard
-  const userData = Object.values(users).map((user) => {
-    const userObj = { id: user.id };
-
-    // Dynamically add all parameters from schema
-    Object.keys(PARAMETER_SCHEMA).forEach((param) => {
-      userObj[param] = user[param] ?? defaultParams[param];
-    });
-
-    return userObj;
-  });
+  // Send entire user objects including id, active, and all parameters
+  const userData = Object.values(users);
 
   maxApi.outlet("usersObject", userData);
 }
@@ -281,11 +273,9 @@ io.on("connection", (socket) => {
 
   let userId = sessionId;
 
-  const userData = { id: userId, ...defaultParams };
+  const userData = { id: userId, active: false, ...defaultParams };
   users[socket.id] = userData;
 
-  console.log("Client connected:", userId);
-  console.log("Total clients now:", Object.keys(users).length);
   updateClientListOutlet();
 
   // Send initial params using bulk update
@@ -303,10 +293,16 @@ io.on("connection", (socket) => {
     socket.emit("parameterSchema", PARAMETER_SCHEMA);
   });
 
+  // Handle client activation status updates
+  socket.on("setActive", (isActive) => {
+    if (users[socket.id]) {
+      users[socket.id].active = Boolean(isActive);
+      updateClientListOutlet();
+    }
+  });
+
   socket.on("disconnect", () => {
     delete users[socket.id];
-    console.log("Client disconnected:", userId);
-    console.log("Total clients now:", Object.keys(users).length);
     updateClientListOutlet();
   });
 });

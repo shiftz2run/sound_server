@@ -8,7 +8,11 @@ const startButton = document.querySelector("#startText");
 // Button click
 window.addEventListener("click", () => {
   if (!oscillator || !oscillator.isStarted) {
-    initAudio();
+    const started = initAudio();
+    // Send active status to server
+    if (started) {
+      socket.emit("setActive", true);
+    }
   }
   // Hide the text after click
   if (startButton) startButton.style.display = "none";
