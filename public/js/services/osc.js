@@ -1,7 +1,20 @@
-const socket = io();
+// Get stored userId from localStorage if it exists
+const storedUserId = localStorage.getItem("oscSession");
+const socket = io({
+  query: { userId: storedUserId || "" },
+});
+
 let context;
 let oscillator;
 let userId = null;
+
+// Register setUserId listener immediately so it catches the event from server
+socket.on("setUserId", (id) => {
+  userId = id;
+  // Store userId in localStorage for persistence across page reloads
+  localStorage.setItem("oscSession", id);
+  console.log("User ID set to:", userId);
+});
 
 const startButton = document.querySelector("#startText");
 

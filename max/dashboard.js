@@ -29,14 +29,17 @@ const COLORS = {
   header: [0.15, 0.15, 0.17, 1.0],
   card: [0.2, 0.2, 0.22, 1.0],
   cardActive: [0.25, 0.35, 0.25, 1.0], // Greenish tint for active clients
+  cardDisconnected: [0.22, 0.15, 0.13, 1.0], // Reddish-brown for disconnected clients
   text: [0.9, 0.9, 0.9, 1.0],
   textDim: [0.6, 0.6, 0.6, 1.0],
+  textDisconnected: [0.4, 0.4, 0.4, 1.0], // Dimmer text for disconnected
   accent: [0.3, 0.6, 0.9, 1.0],
   meter: [0.2, 0.8, 0.4, 1.0],
   meterBg: [0.15, 0.15, 0.17, 1.0],
   scrollbar: [0.4, 0.4, 0.45, 0.8],
   scrollbarBg: [0.15, 0.15, 0.17, 0.5],
   activeIndicator: [0.2, 0.9, 0.3, 1.0], // Bright green for active status
+  disconnectedIndicator: [0.8, 0.3, 0.3, 1.0], // Red for disconnected
 };
 
 // Handle incoming data from Max
@@ -60,15 +63,16 @@ function anything() {
       const jsonString = dict.stringify();
       const data = JSON.parse(jsonString);
 
-      // The data might be an array directly, or wrapped in an object with "array" key
-      if (Array.isArray(data)) {
+      // The data is an object with index as key
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        // Convert object to array with index property
+        clients = Object.keys(data).map((index) => ({
+          index: parseInt(index),
+          ...data[index],
+        }));
+      } else if (Array.isArray(data)) {
+        // Fallback: if it's already an array
         clients = data;
-      } else if (
-        data &&
-        typeof data === "object" &&
-        Array.isArray(data.array)
-      ) {
-        clients = data.array;
       } else {
         clients = [];
       }
@@ -218,26 +222,41 @@ function drawScrollbar(width, height) {
 
 // Draw individual client card
 function drawClientCard(client, x, y, width) {
-  // Card background - use different color for active clients
-  const isActive = client.active || false;
-  setColor(isActive ? COLORS.cardActive : COLORS.card);
+  const isActive = Boolean(client.active);
+  const isConnected = Boolean(client.connected); // Convert 0/1 to boolean
+
+  // Card background - different colors for connected/active states
+  let cardColor = COLORS.card;
+  if (!isConnected) {
+    cardColor = COLORS.cardDisconnected;
+  } else if (isActive) {
+    cardColor = COLORS.cardActive;
+  }
+
+  setColor(cardColor);
   mgraphics.rectangle(x, y, width, CLIENT_CARD_HEIGHT);
   mgraphics.fill();
 
-  // Active indicator (green dot in top-right corner)
-  if (isActive) {
+  // Status indicator (dot in top-right corner)
+  if (!isConnected) {
+    setColor(COLORS.disconnectedIndicator);
+    mgraphics.ellipse(x + width - 15, y + 10, 8, 8);
+    mgraphics.fill();
+  } else if (isActive) {
     setColor(COLORS.activeIndicator);
     mgraphics.ellipse(x + width - 15, y + 10, 8, 8);
     mgraphics.fill();
   }
 
-  // Client ID
-  setColor(COLORS.text);
+  // Client index - prominently displayed
+  const textColor = isConnected ? COLORS.text : COLORS.textDisconnected;
+  setColor(textColor);
   mgraphics.select_font_face("Arial Bold");
-  mgraphics.set_font_size(12);
+  mgraphics.set_font_size(14);
   mgraphics.move_to(x + 10, y + 20);
-  const displayId = client.id ? String(client.id).substring(0, 16) : "Unknown";
-  mgraphics.show_text("ID: " + displayId);
+  const displayIndex = client.index !== undefined ? "#" + client.index : "?";
+  const statusText = !isConnected ? " (disconnected)" : "";
+  mgraphics.show_text(displayIndex + statusText);
 
   // Frequency
   const freqY = y + 40;

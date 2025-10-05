@@ -22,7 +22,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-let users = {}; // { socketId: { id, frequency, amplitude, ... } }
+let users = {}; // { clientIndex: { id, socketId, connected, active, frequency, amplitude, ... } }
+let clientIndexCounter = 1; // Auto-incrementing index for clients
+let socketToIndexMap = {}; // { socket.id: clientIndex } for fast lookups
 let debugMode = false;
 
 // Get default parameters from schema
@@ -48,47 +50,55 @@ function setParametersForClients(parameters, clientIds = null) {
     return results;
   }
 
-  // Determine target clients
-  let targetClients = [];
+  // Determine target clients (indexes)
+  let targetIndexes = [];
   if (clientIds === null) {
-    // Apply to all clients
-    targetClients = Object.keys(users);
+    // Apply to all connected clients
+    targetIndexes = Object.keys(users).filter(
+      (index) => users[index].connected,
+    );
   } else {
-    // Apply to specific clients
-    targetClients = clientIds.filter((id) => users[id]);
+    // Apply to specific clients (only if connected)
+    targetIndexes = clientIds.filter(
+      (index) => users[index] && users[index].connected,
+    );
   }
 
   // Update user data for all valid parameters
   for (const [param, value] of Object.entries(validParameters)) {
-    if (targetClients.length === 0) {
+    if (targetIndexes.length === 0) {
       // Update default params if no specific clients
       defaultParams[param] = value;
-      // Update all user data
-      Object.keys(users).forEach((socketId) => {
-        users[socketId][param] = value;
+      // Update all user data (both connected and disconnected)
+      Object.keys(users).forEach((index) => {
+        users[index][param] = value;
       });
     } else {
       // Update specific clients
-      targetClients.forEach((socketId) => {
-        users[socketId][param] = value;
+      targetIndexes.forEach((index) => {
+        users[index][param] = value;
       });
     }
 
     results.success.push({
       param,
       value,
-      clients: targetClients.length || "all",
+      clients: targetIndexes.length || "all",
     });
   }
 
-  // Send bulk parameter update via socket (only valid parameters)
-  if (targetClients.length === 0) {
-    // Emit to all clients
-    io.emit("setParameters", validParameters);
+  // Send bulk parameter update via socket (only to connected clients)
+  if (targetIndexes.length === 0) {
+    // Emit to all connected clients
+    Object.keys(users).forEach((index) => {
+      if (users[index].connected) {
+        io.to(users[index].socketId).emit("setParameters", validParameters);
+      }
+    });
   } else {
     // Emit to specific clients
-    targetClients.forEach((socketId) => {
-      io.to(socketId).emit("setParameters", validParameters);
+    targetIndexes.forEach((index) => {
+      io.to(users[index].socketId).emit("setParameters", validParameters);
     });
   }
 
@@ -105,10 +115,10 @@ function setParametersListForClients(
   mode = "beginning",
   clientIds = null,
 ) {
-  // Get current clients
+  // Get current connected clients (indexes)
   const availableClients = clientIds
-    ? clientIds.filter((id) => users[id])
-    : Object.keys(users);
+    ? clientIds.filter((index) => users[index] && users[index].connected)
+    : Object.keys(users).filter((index) => users[index].connected);
 
   // Distribute values to clients
   const assignments = distributeValuesToClients(
@@ -158,10 +168,10 @@ function setFFTDataForClients(
     });
   }
 
-  // Get current clients
+  // Get current connected clients
   const availableClients = clientIds
-    ? clientIds.filter((id) => users[id])
-    : Object.keys(users);
+    ? clientIds.filter((index) => users[index] && users[index].connected)
+    : Object.keys(users).filter((index) => users[index].connected);
 
   // Distribute FFT pairs to clients using existing distribution logic
   const assignments = distributeValuesToClients(
@@ -193,19 +203,19 @@ function setFFTDataForClients(
 
 // Function to send updated client list to Max
 function updateClientListOutlet() {
-  const clientList = Object.keys(users);
-  const clientCount = clientList.length;
+  // Get only connected clients
+  const connectedClientList = Object.keys(users).filter(
+    (index) => users[index].connected,
+  );
+  const connectedClientCount = connectedClientList.length;
 
-  // Send client list and count to Max
-  maxApi.outlet("clientList", clientList);
-  maxApi.outlet("clientCount", clientCount);
-  maxApi.outlet(clientCount); // Send just the number directly
+  // Send connected client list and count to Max
+  maxApi.outlet("connectedClientList", connectedClientList);
+  maxApi.outlet("connectedClientCount", connectedClientCount);
+  maxApi.outlet(connectedClientCount); // Send just the number directly
 
-  // Send full user data object to Max for dashboard
-  // Send entire user objects including id, active, and all parameters
-  const userData = Object.values(users);
-
-  maxApi.outlet("usersObject", userData);
+  // Send users object directly with index as key
+  maxApi.outlet("usersObject", users);
 }
 
 // ===== Max API Handlers =====
@@ -263,18 +273,57 @@ io.on("connection", (socket) => {
     // In debug mode, create unique ID for each connection
     sessionId = uuidv4();
   } else {
-    // Try to get existing session from cookies
+    // Try to get existing session from query params, then cookies, then generate new
+    const queryUserId = socket.handshake.query.userId;
+    const cookieUserId = socket.handshake.headers.cookie
+      ?.split(";")
+      .find((c) => c.trim().startsWith("oscSession="))
+      ?.split("=")[1];
+
     sessionId =
-      socket.handshake.headers.cookie
-        ?.split(";")
-        .find((c) => c.trim().startsWith("oscSession="))
-        ?.split("=")[1] || uuidv4();
+      queryUserId && queryUserId !== ""
+        ? queryUserId
+        : cookieUserId || uuidv4();
   }
 
   let userId = sessionId;
+  let clientIndex;
 
-  const userData = { id: userId, active: false, ...defaultParams };
-  users[socket.id] = userData;
+  // In non-debug mode, check if this sessionId already exists and reuse its index
+  if (!debugMode) {
+    const existingIndex = Object.keys(users).find(
+      (index) => users[index].id === userId,
+    );
+
+    if (existingIndex) {
+      // Reuse existing index for returning user
+      clientIndex = existingIndex;
+      users[clientIndex].socketId = socket.id;
+      users[clientIndex].connected = true;
+    } else {
+      // New user - assign new index
+      clientIndex = clientIndexCounter++;
+      users[clientIndex] = {
+        id: userId,
+        socketId: socket.id,
+        connected: true,
+        active: false,
+        ...defaultParams,
+      };
+    }
+  } else {
+    // Debug mode: always assign new index
+    clientIndex = clientIndexCounter++;
+    users[clientIndex] = {
+      id: userId,
+      socketId: socket.id,
+      connected: true,
+      active: false,
+      ...defaultParams,
+    };
+  }
+
+  socketToIndexMap[socket.id] = clientIndex;
 
   updateClientListOutlet();
 
@@ -295,15 +344,21 @@ io.on("connection", (socket) => {
 
   // Handle client activation status updates
   socket.on("setActive", (isActive) => {
-    if (users[socket.id]) {
-      users[socket.id].active = Boolean(isActive);
+    const clientIndex = socketToIndexMap[socket.id];
+    if (clientIndex && users[clientIndex]) {
+      users[clientIndex].active = Boolean(isActive);
       updateClientListOutlet();
     }
   });
 
   socket.on("disconnect", () => {
-    delete users[socket.id];
-    updateClientListOutlet();
+    const clientIndex = socketToIndexMap[socket.id];
+    if (clientIndex && users[clientIndex]) {
+      users[clientIndex].connected = false;
+      users[clientIndex].active = false;
+      delete socketToIndexMap[socket.id];
+      updateClientListOutlet();
+    }
   });
 });
 

@@ -13,7 +13,6 @@ function registerSocketParameterListeners(socket, oscillator) {
           const setterName = `set${capitalize(param)}`;
           if (typeof oscillator[setterName] === "function") {
             oscillator[setterName](value);
-            console.log(`${param} set to:`, value);
           } else {
             console.warn(`No setter method found for parameter: ${param}`);
           }
@@ -24,8 +23,6 @@ function registerSocketParameterListeners(socket, oscillator) {
     // Add bulk parameter update listener
     socket.on("setParameters", (parameters) => {
       if (oscillator && typeof parameters === "object") {
-        console.log("Bulk parameter update received:", parameters);
-
         // Use the optimized updateParameters method if available
         if (typeof oscillator.updateParameters === "function") {
           oscillator.updateParameters(parameters);
@@ -40,8 +37,6 @@ function registerSocketParameterListeners(socket, oscillator) {
             }
           });
         }
-
-        console.log("Bulk update applied successfully");
       }
     });
 
@@ -57,31 +52,11 @@ function capitalize(str) {
 }
 
 // Register additional non-parameter socket listeners
+// Note: setUserId is registered in osc.js immediately to catch early events
 function registerAdditionalSocketListeners(socket, oscillator) {
-  socket.on("setUserId", (id) => {
-    userId = id;
-    console.log("User ID set to:", userId);
-  });
-
-  socket.on("clientType", (type) => {
-    console.log("Client type:", type);
-  });
-
   socket.on("noteOn", (params = null) => {
-    console.log(
-      "Note on trigger",
-      params ? `with params: ${JSON.stringify(params)}` : "",
-    );
     if (oscillator) {
       oscillator.triggerNote(params);
     }
-  });
-
-  socket.on("connect", () => {
-    console.log("Connected to server");
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Disconnected from server");
   });
 }
