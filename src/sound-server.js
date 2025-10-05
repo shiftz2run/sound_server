@@ -23,7 +23,6 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 let users = {}; // { socketId: { id, frequency, amplitude, ... } }
-let oscUsers = {}; // Only users from /osc.html
 let debugMode = false;
 
 // Get default parameters from schema
@@ -67,17 +66,11 @@ function setParametersForClients(parameters, clientIds = null) {
       // Update all user data
       Object.keys(users).forEach((socketId) => {
         users[socketId][param] = value;
-        if (oscUsers[socketId]) {
-          oscUsers[socketId][param] = value;
-        }
       });
     } else {
       // Update specific clients
       targetClients.forEach((socketId) => {
         users[socketId][param] = value;
-        if (oscUsers[socketId]) {
-          oscUsers[socketId][param] = value;
-        }
       });
     }
 
@@ -198,34 +191,21 @@ function setFFTDataForClients(
   return results;
 }
 
-// Function to send updated client list to Max and web dashboard
+// Function to send updated client list to Max
 function updateClientListOutlet() {
-  const clientList = Object.keys(oscUsers);
+  const clientList = Object.keys(users);
   const clientCount = clientList.length;
 
-  // Send both the list and count to Max
+  // Send client list and count to Max
   maxApi.outlet("clientList", clientList);
   maxApi.outlet("clientCount", clientCount);
   maxApi.outlet(clientCount); // Send just the number directly
 
-  // Also emit to all web clients for dashboard updates
-  const userData = Object.values(oscUsers).map((user) => ({
-    id: user.id,
-    frequency: user.frequency || defaultParams.frequency,
-    amplitude: user.amplitude || defaultParams.amplitude,
-    attackTime: user.attackTime || defaultParams.attackTime,
-    decayTime: user.decayTime || defaultParams.decayTime,
-    sustainLevel: user.sustainLevel || defaultParams.sustainLevel,
-    frequencySmoothing:
-      user.frequencySmoothing || defaultParams.frequencySmoothing,
-    amplitudeSmoothing:
-      user.amplitudeSmoothing || defaultParams.amplitudeSmoothing,
-    adsOn: user.adsOn || defaultParams.adsOn,
-    waveform: user.waveform || defaultParams.waveform,
-    customWaveform: user.customWaveform || defaultParams.customWaveform,
-  }));
+  // Send full user data object to Max for dashboard
+  // Send entire user objects including id, active, and all parameters
+  const userData = Object.values(users);
 
-  io.emit("usersUpdate", userData);
+  maxApi.outlet("usersObject", userData);
 }
 
 // ===== Max API Handlers =====
@@ -248,32 +228,28 @@ maxApi.addHandler("setDebugMode", (mode) => {
 
 // Enhanced debug handler
 maxApi.addHandler("debug", () => {
-  const oscClientCount = Object.keys(oscUsers).length;
-  const allClientCount = Object.keys(users).length;
+  const clientCount = Object.keys(users).length;
   const waveformTypes = PARAMETER_SCHEMA.waveform
     ? PARAMETER_SCHEMA.waveform.values
     : [];
 
   console.log("=== DEBUG INFO ===");
   console.log("Debug Mode:", debugMode);
-  console.log("OSC Clients:", Object.keys(oscUsers));
-  console.log("All Clients:", Object.keys(users));
-  console.log("OSC Client Count:", oscClientCount);
-  console.log("All Client Count:", allClientCount);
+  console.log("Connected Clients:", Object.keys(users));
+  console.log("Client Count:", clientCount);
   console.log("Available Waveforms:", waveformTypes);
   console.log("Parameter Schema:", Object.keys(PARAMETER_SCHEMA));
 
   // Send debug info to Max
   maxApi.outlet("debug", {
     debugMode: debugMode,
-    oscClients: Object.keys(oscUsers),
-    oscCount: oscClientCount,
-    allCount: allClientCount,
+    clients: Object.keys(users),
+    clientCount: clientCount,
     waveformTypes: waveformTypes,
     parameters: Object.keys(PARAMETER_SCHEMA),
   });
 
-  return { debugMode, oscCount: oscClientCount, allCount: allClientCount };
+  return { debugMode, clientCount };
 });
 
 // ===== Static Files =====
@@ -281,10 +257,6 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // ===== Socket connection =====
 io.on("connection", (socket) => {
-  // Get the referer to determine which page the client came from
-  const referer = socket.handshake.headers.referer;
-  const isOSCClient = referer && referer.includes("/osc.html");
-
   // Assign session ID / user ID
   let sessionId;
   if (debugMode) {
@@ -301,23 +273,14 @@ io.on("connection", (socket) => {
 
   let userId = sessionId;
 
-  const userData = { id: userId, isOSCClient, ...defaultParams };
+  const userData = { id: userId, active: false, ...defaultParams };
   users[socket.id] = userData;
 
-  // Only add to oscUsers if they're from osc.html
-  if (isOSCClient) {
-    oscUsers[socket.id] = userData;
-    console.log("OSC Client connected:", userId);
-    console.log("Total OSC clients now:", Object.keys(oscUsers).length);
-    updateClientListOutlet();
-  } else {
-    console.log("Regular client connected:", userId);
-  }
+  updateClientListOutlet();
 
   // Send initial params using bulk update
   socket.emit("setParameters", defaultParams);
   socket.emit("setUserId", userId);
-  socket.emit("clientType", isOSCClient ? "osc" : "regular");
 
   // Send available waveform types
   const waveformTypes = PARAMETER_SCHEMA.waveform
@@ -330,19 +293,17 @@ io.on("connection", (socket) => {
     socket.emit("parameterSchema", PARAMETER_SCHEMA);
   });
 
-  socket.on("disconnect", () => {
-    const wasOSCClient = users[socket.id]?.isOSCClient;
-
-    delete users[socket.id];
-
-    if (wasOSCClient) {
-      delete oscUsers[socket.id];
-      console.log("OSC Client disconnected:", userId);
-      console.log("Total OSC clients now:", Object.keys(oscUsers).length);
+  // Handle client activation status updates
+  socket.on("setActive", (isActive) => {
+    if (users[socket.id]) {
+      users[socket.id].active = Boolean(isActive);
       updateClientListOutlet();
-    } else {
-      console.log("Regular client disconnected:", userId);
     }
+  });
+
+  socket.on("disconnect", () => {
+    delete users[socket.id];
+    updateClientListOutlet();
   });
 });
 
