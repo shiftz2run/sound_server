@@ -202,22 +202,16 @@ function updateClientListOutlet() {
   maxApi.outlet(clientCount); // Send just the number directly
 
   // Send full user data object to Max for dashboard
-  const userData = Object.values(users).map((user) => ({
-    id: user.id,
-    frequency: user.frequency || defaultParams.frequency,
-    amplitude: user.amplitude || defaultParams.amplitude,
-    attackTime: user.attackTime || defaultParams.attackTime,
-    decayTime: user.decayTime || defaultParams.decayTime,
-    sustainLevel: user.sustainLevel || defaultParams.sustainLevel,
-    frequencySmoothing:
-      user.frequencySmoothing || defaultParams.frequencySmoothing,
-    amplitudeSmoothing:
-      user.amplitudeSmoothing || defaultParams.amplitudeSmoothing,
-    adsOn: user.adsOn || defaultParams.adsOn,
-    adsTriggerMode: user.adsTriggerMode || defaultParams.adsTriggerMode,
-    waveform: user.waveform || defaultParams.waveform,
-    customWaveform: user.customWaveform || defaultParams.customWaveform,
-  }));
+  const userData = Object.values(users).map((user) => {
+    const userObj = { id: user.id };
+
+    // Dynamically add all parameters from schema
+    Object.keys(PARAMETER_SCHEMA).forEach((param) => {
+      userObj[param] = user[param] ?? defaultParams[param];
+    });
+
+    return userObj;
+  });
 
   maxApi.outlet("usersObject", userData);
 }
