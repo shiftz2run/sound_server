@@ -1,28 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-  <head><title>Users Online</title></head>
-  <body>
-    <h1>Connected Users: <span id="count">0</span></h1>
-    <ul id="userList"></ul>
+    <head>
+        <meta charset="utf-8" />
+        <title>Oscillator Client</title>
+    </head>
+    <body>
+        <p id="startText">Click anywhere to start the oscillator:</p>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      const socket = io();
-      // don't call socket.emit("register", "oscillator")
-
-      socket.on("usersUpdate", (users) => {
-        document.getElementById("count").innerText = users.length;
-
-        const userList = document.getElementById("userList");
-        userList.innerHTML = "";
-
-        users.forEach((user) => {
-          const li = document.createElement("li");
-          li.innerHTML = `<strong>User ID:</strong> ${user.id}<br>
-                          <strong>Frequency:</strong> ${user.frequency} Hz`;
-          userList.appendChild(li);
-        });
-      });
-    </script>
-  </body>
+        <!-- Load socket.io client from the server -->
+        <script src="/socket.io/socket.io.js"></script>
+        <!-- Load WebAudioOscillator class -->
+        <script src="/js/audio/WebAudioOscillator.js"></script>
+        <!-- Load parameter socket listeners -->
+        <script src="/js/parameterSocketListeners.js"></script>
+        <!-- Then load your oscillator code -->
+        <script src="/js/services/osc.js"></script>
+    </body>
 </html>
