@@ -10,9 +10,29 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 87.0, 1372.0, 779.0 ],
+		"rect" : [ 34.0, 87.0, 757.0, 779.0 ],
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
+				"box" : 				{
+					"filename" : "dashboard.js",
+					"id" : "obj-10",
+					"maxclass" : "v8ui",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"parameter_enable" : 0,
+					"patching_rect" : [ 367.901263952255249, 1016.049463868141174, 460.529392719268799, 240.0 ],
+					"textfile" : 					{
+						"filename" : "dashboard.js",
+						"flags" : 0,
+						"embed" : 0,
+						"autowatch" : 1
+					}
+
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-27",
 					"items" : [ "manual", ",", "auto" ],
@@ -1192,6 +1212,8 @@
 										"args" : [ 8000, "osc.html", 5000 ],
 										"autostart" : 0,
 										"defer" : 0,
+										"node_bin_path" : "",
+										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,
@@ -2089,19 +2111,6 @@
 			}
 , 			{
 				"box" : 				{
-					"id" : "obj-13",
-					"linecount" : 2,
-					"maxclass" : "message",
-					"numinlets" : 2,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 544.594558238983154, 148.648638725280762, 271.0, 35.0 ],
-					"text" : ";\rmax launchbrowser http://localhost:8000/osc.html"
-				}
-
-			}
-, 			{
-				"box" : 				{
 					"id" : "obj-12",
 					"linecount" : 2,
 					"maxclass" : "message",
@@ -2181,6 +2190,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -2481,6 +2492,14 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-10", 0 ],
+					"order" : 1,
+					"source" : [ "obj-5", 2 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-146", 0 ],
 					"source" : [ "obj-5", 1 ]
 				}
@@ -2489,6 +2508,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-165", 0 ],
+					"order" : 0,
 					"source" : [ "obj-5", 2 ]
 				}
 
@@ -2691,6 +2711,13 @@
 				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/soundfiles",
 				"patcherrelativepath" : "../assets/soundfiles",
 				"type" : "WAVE",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "dashboard.js",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
+				"patcherrelativepath" : ".",
+				"type" : "TEXT",
 				"implicit" : 1
 			}
 , 			{
