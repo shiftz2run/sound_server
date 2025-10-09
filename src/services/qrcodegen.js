@@ -19,7 +19,7 @@ if (argv[0] === "-h" || argv[0] === "--help" || argv[0] === "help") {
   process.exit(0);
 }
 const port = argv[0] ? Number(argv[0]) : 8000;
-const rawPath = argv[1] ? String(argv[1]) : "osc.html";
+const rawPath = argv[1] ? String(argv[1]) : "";
 const intervalMs = argv[2] ? Math.max(500, Number(argv[2])) : 3000;
 
 function normalizePath(p) {
