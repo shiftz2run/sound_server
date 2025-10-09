@@ -64,6 +64,7 @@ function distributeValuesToClients(
   clientIds,
   mode = "beginning",
   groups = 0,
+  delay = 0,
 ) {
   if (!Array.isArray(valuesList) || valuesList.length === 0) {
     return [];
@@ -98,12 +99,16 @@ function distributeValuesToClients(
 
   const assignments = [];
 
+  // Normalize delay to array format
+  const delayArray = Array.isArray(delay) ? delay : [delay];
+
   // Group mode: divide clients into groups
   if (groups > 0) {
     const clientsPerGroup = Math.floor(targetClients.length / groups);
     const remainder = targetClients.length % groups;
 
     let clientIndex = 0;
+    let cumulativeDelay = 0;
     for (let groupIndex = 0; groupIndex < groups; groupIndex++) {
       // Distribute remainder across first groups (so groups are more evenly sized)
       const groupSize = clientsPerGroup + (groupIndex < remainder ? 1 : 0);
@@ -120,19 +125,27 @@ function distributeValuesToClients(
         assignments.push({
           clientId: targetClients[clientIndex],
           value: value,
+          delay: cumulativeDelay,
         });
         clientIndex++;
       }
+
+      // Add delay for next group
+      cumulativeDelay += delayArray[groupIndex % delayArray.length];
     }
   } else {
     // Original behavior: 1:1 distribution
     const maxAssignments = Math.min(valuesList.length, targetClients.length);
 
+    let cumulativeDelay = 0;
     for (let i = 0; i < maxAssignments; i++) {
       assignments.push({
         clientId: targetClients[i],
         value: valuesList[i],
+        delay: cumulativeDelay,
       });
+      // Add delay for next client
+      cumulativeDelay += delayArray[i % delayArray.length];
     }
   }
 

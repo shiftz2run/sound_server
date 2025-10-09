@@ -18,8 +18,8 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 345.0, 49.0, 169.0, 20.0 ],
-					"text" : "@mode, @clientIds, @groups"
+					"patching_rect" : [ 345.0, 49.0, 217.0, 20.0 ],
+					"text" : "@mode, @clientIds, @groups, @delay"
 				}
 
 			}
@@ -42,8 +42,8 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 345.0, 73.0, 235.0, 22.0 ],
-					"text" : "patcherargs @mode beginning @groups 0"
+					"patching_rect" : [ 345.0, 73.0, 289.0, 22.0 ],
+					"text" : "patcherargs @mode beginning @groups 0 @delay 0"
 				}
 
 			}
@@ -75,11 +75,11 @@
 				"box" : 				{
 					"id" : "obj-8",
 					"maxclass" : "newobj",
-					"numinlets" : 4,
-					"numoutlets" : 4,
-					"outlettype" : [ "", "", "", "" ],
-					"patching_rect" : [ 78.0, 134.0, 182.0, 22.0 ],
-					"text" : "routepass mode clientIds groups"
+					"numinlets" : 5,
+					"numoutlets" : 5,
+					"outlettype" : [ "", "", "", "", "" ],
+					"patching_rect" : [ 78.0, 134.0, 214.0, 22.0 ],
+					"text" : "routepass mode clientIds groups delay"
 				}
 
 			}
@@ -152,7 +152,7 @@
 			}
 , 			{
 				"box" : 				{
-					"comment" : "values, @mode, @clientIds, @groups, clear",
+					"comment" : "values, @mode, @clientIds, @groups, @delay, clear",
 					"id" : "obj-5",
 					"index" : 1,
 					"maxclass" : "inlet",
@@ -256,6 +256,13 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-10", 0 ],
+					"source" : [ "obj-8", 4 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-9", 0 ],
 					"source" : [ "obj-8", 3 ]
 				}
 

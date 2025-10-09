@@ -42,8 +42,8 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 409.0, 96.0, 212.0, 20.0 ],
-					"text" : "@param @mode @clientIds @groups"
+					"patching_rect" : [ 409.0, 96.0, 256.0, 20.0 ],
+					"text" : "@param @mode @clientIds @groups @delay"
 				}
 
 			}
@@ -90,7 +90,7 @@
 					"numinlets" : 3,
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
-					"patching_rect" : [ 776.0, 240.0, 103.0, 22.0 ],
+					"patching_rect" : [ 815.0, 239.0, 103.0, 22.0 ],
 					"text" : "route param clear"
 				}
 
@@ -111,11 +111,11 @@
 				"box" : 				{
 					"id" : "obj-8",
 					"maxclass" : "newobj",
-					"numinlets" : 3,
-					"numoutlets" : 3,
-					"outlettype" : [ "", "", "" ],
-					"patching_rect" : [ 653.0, 188.0, 149.0, 22.0 ],
-					"text" : "routepass clientIds groups"
+					"numinlets" : 4,
+					"numoutlets" : 4,
+					"outlettype" : [ "", "", "", "" ],
+					"patching_rect" : [ 653.0, 188.0, 181.0, 22.0 ],
+					"text" : "routepass clientIds groups delay"
 				}
 
 			}
@@ -133,7 +133,7 @@
 			}
 , 			{
 				"box" : 				{
-					"comment" : "values, @param, @clientIds, @groups, clear",
+					"comment" : "values, @param, @clientIds, @groups, @delay, clear",
 					"id" : "obj-29",
 					"index" : 1,
 					"maxclass" : "inlet",
@@ -361,6 +361,13 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-24", 0 ],
+					"source" : [ "obj-8", 3 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-9", 0 ],
 					"source" : [ "obj-8", 2 ]
 				}
 
