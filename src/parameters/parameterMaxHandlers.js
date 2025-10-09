@@ -25,16 +25,17 @@ function registerMaxHandlers(
       );
     });
 
-    // List parameter handler - paramDict: { values: <array>, mode?: <optional>, clientIds?: <optional>, groups?: <optional> }
+    // List parameter handler - paramDict: { values: <array>, mode?: <optional>, clientIds?: <optional>, groups?: <optional>, delay?: <optional> }
     maxApi.addHandler(`set${capitalize(param)}List`, (paramDict) => {
       const {
         values,
         mode = "beginning",
         clientIds = null,
         groups = 0,
+        delay = 0,
       } = paramDict;
       console.log(
-        `set${capitalize(param)}List(values=${values}, mode=${mode}, clientIds=${clientIds}, groups=${groups})`,
+        `set${capitalize(param)}List(values=${values}, mode=${mode}, clientIds=${clientIds}, groups=${groups}, delay=${delay})`,
       );
       return setParametersListForClients(
         param,
@@ -42,6 +43,7 @@ function registerMaxHandlers(
         mode,
         clientIds ? [clientIds] : null,
         groups,
+        delay,
       );
     });
   });
@@ -53,19 +55,21 @@ function registerMaxHandlers(
     return setParametersForClients(params, clientIds ? [clientIds] : null);
   });
 
-  // FFT data distribution handler - paramDict: { values: <array>, mode?: <optional>, clientIds?: <optional>, groups?: <optional> }
+  // FFT data distribution handler - paramDict: { values: <array>, mode?: <optional>, clientIds?: <optional>, groups?: <optional>, delay?: <optional> }
   maxApi.addHandler("setFFTData", (paramDict) => {
     const {
       values,
       mode = "beginning",
       clientIds = null,
       groups = 0,
+      delay = 0,
     } = paramDict;
     return setFFTDataForClients(
       values,
       mode,
       clientIds ? [clientIds] : null,
       groups,
+      delay,
     );
   });
 

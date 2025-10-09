@@ -115,6 +115,7 @@ function setParametersListForClients(
   mode = "beginning",
   clientIds = null,
   groups = 0,
+  delay = 0,
 ) {
   // Get current connected clients (indexes)
   const availableClients = clientIds
@@ -127,14 +128,22 @@ function setParametersListForClients(
     availableClients,
     mode,
     groups,
+    delay,
   );
 
-  // Apply each assignment individually
+  // Apply each assignment individually, with delays
   const results = { success: [], errors: [] };
-  assignments.forEach(({ clientId, value }) => {
-    const result = setParametersForClients({ [param]: value }, [clientId]);
-    results.success.push(...result.success);
-    results.errors.push(...result.errors);
+  assignments.forEach(({ clientId, value, delay }) => {
+    if (delay > 0) {
+      setTimeout(() => {
+        setParametersForClients({ [param]: value }, [clientId]);
+      }, delay);
+      results.success.push({ clientId, param, value, delay });
+    } else {
+      const result = setParametersForClients({ [param]: value }, [clientId]);
+      results.success.push(...result.success);
+      results.errors.push(...result.errors);
+    }
   });
 
   return results;
@@ -146,6 +155,7 @@ function setFFTDataForClients(
   mode = "beginning",
   clientIds = null,
   groups = 0,
+  delay = 0,
 ) {
   const results = { success: [], errors: [] };
 
@@ -182,24 +192,43 @@ function setFFTDataForClients(
     availableClients,
     mode,
     groups,
+    delay,
   );
 
-  // Apply each assignment (both amplitude and frequency for each client)
-  assignments.forEach(({ clientId, value }) => {
-    const result = setParametersForClients(
-      {
+  // Apply each assignment (both amplitude and frequency for each client), with delays
+  assignments.forEach(({ clientId, value, delay }) => {
+    if (delay > 0) {
+      setTimeout(() => {
+        setParametersForClients(
+          {
+            amplitude: value.amplitude,
+            frequency: value.frequency,
+          },
+          [clientId],
+        );
+      }, delay);
+      results.success.push({
+        clientId,
         amplitude: value.amplitude,
         frequency: value.frequency,
-      },
-      [clientId],
-    );
-    results.success.push({
-      clientId,
-      amplitude: value.amplitude,
-      frequency: value.frequency,
-      parameterResults: result,
-    });
-    results.errors.push(...result.errors);
+        delay,
+      });
+    } else {
+      const result = setParametersForClients(
+        {
+          amplitude: value.amplitude,
+          frequency: value.frequency,
+        },
+        [clientId],
+      );
+      results.success.push({
+        clientId,
+        amplitude: value.amplitude,
+        frequency: value.frequency,
+        parameterResults: result,
+      });
+      results.errors.push(...result.errors);
+    }
   });
 
   return results;
