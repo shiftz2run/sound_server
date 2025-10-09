@@ -59,7 +59,12 @@ function getDefaultParameters() {
   return defaultValues;
 }
 
-function distributeValuesToClients(valuesList, clientIds, mode = "beginning") {
+function distributeValuesToClients(
+  valuesList,
+  clientIds,
+  mode = "beginning",
+  groups = 0,
+) {
   if (!Array.isArray(valuesList) || valuesList.length === 0) {
     return [];
   }
@@ -91,15 +96,44 @@ function distributeValuesToClients(valuesList, clientIds, mode = "beginning") {
       break;
   }
 
-  // Create distribution pairs (only up to the smaller of the two arrays)
   const assignments = [];
-  const maxAssignments = Math.min(valuesList.length, targetClients.length);
 
-  for (let i = 0; i < maxAssignments; i++) {
-    assignments.push({
-      clientId: targetClients[i],
-      value: valuesList[i],
-    });
+  // Group mode: divide clients into groups
+  if (groups > 0) {
+    const clientsPerGroup = Math.floor(targetClients.length / groups);
+    const remainder = targetClients.length % groups;
+
+    let clientIndex = 0;
+    for (let groupIndex = 0; groupIndex < groups; groupIndex++) {
+      // Distribute remainder across first groups (so groups are more evenly sized)
+      const groupSize = clientsPerGroup + (groupIndex < remainder ? 1 : 0);
+      const value =
+        valuesList[groupIndex] !== undefined
+          ? valuesList[groupIndex]
+          : valuesList[valuesList.length - 1];
+
+      for (
+        let i = 0;
+        i < groupSize && clientIndex < targetClients.length;
+        i++
+      ) {
+        assignments.push({
+          clientId: targetClients[clientIndex],
+          value: value,
+        });
+        clientIndex++;
+      }
+    }
+  } else {
+    // Original behavior: 1:1 distribution
+    const maxAssignments = Math.min(valuesList.length, targetClients.length);
+
+    for (let i = 0; i < maxAssignments; i++) {
+      assignments.push({
+        clientId: targetClients[i],
+        value: valuesList[i],
+      });
+    }
   }
 
   return assignments;

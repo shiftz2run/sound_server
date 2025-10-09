@@ -18,8 +18,8 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 345.0, 49.0, 150.0, 20.0 ],
-					"text" : "@mode, @clientIds"
+					"patching_rect" : [ 345.0, 49.0, 169.0, 20.0 ],
+					"text" : "@mode, @clientIds, @groups"
 				}
 
 			}
@@ -42,8 +42,8 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 345.0, 73.0, 173.0, 22.0 ],
-					"text" : "patcherargs @mode beginning"
+					"patching_rect" : [ 345.0, 73.0, 235.0, 22.0 ],
+					"text" : "patcherargs @mode beginning @groups 0"
 				}
 
 			}
@@ -75,11 +75,11 @@
 				"box" : 				{
 					"id" : "obj-8",
 					"maxclass" : "newobj",
-					"numinlets" : 3,
-					"numoutlets" : 3,
-					"outlettype" : [ "", "", "" ],
-					"patching_rect" : [ 78.0, 134.0, 142.0, 22.0 ],
-					"text" : "routepass mode clientIds"
+					"numinlets" : 4,
+					"numoutlets" : 4,
+					"outlettype" : [ "", "", "", "" ],
+					"patching_rect" : [ 78.0, 134.0, 182.0, 22.0 ],
+					"text" : "routepass mode clientIds groups"
 				}
 
 			}
@@ -152,7 +152,7 @@
 			}
 , 			{
 				"box" : 				{
-					"comment" : "values, @mode, @clientIds, clear",
+					"comment" : "values, @mode, @clientIds, @groups, clear",
 					"id" : "obj-5",
 					"index" : 1,
 					"maxclass" : "inlet",
@@ -256,6 +256,13 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-10", 0 ],
+					"source" : [ "obj-8", 3 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-9", 0 ],
 					"source" : [ "obj-8", 2 ]
 				}
 

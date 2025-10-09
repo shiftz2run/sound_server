@@ -114,6 +114,7 @@ function setParametersListForClients(
   valuesList,
   mode = "beginning",
   clientIds = null,
+  groups = 0,
 ) {
   // Get current connected clients (indexes)
   const availableClients = clientIds
@@ -125,6 +126,7 @@ function setParametersListForClients(
     valuesList,
     availableClients,
     mode,
+    groups,
   );
 
   // Apply each assignment individually
@@ -143,6 +145,7 @@ function setFFTDataForClients(
   fftDataArray,
   mode = "beginning",
   clientIds = null,
+  groups = 0,
 ) {
   const results = { success: [], errors: [] };
 
@@ -178,6 +181,7 @@ function setFFTDataForClients(
     fftPairs,
     availableClients,
     mode,
+    groups,
   );
 
   // Apply each assignment (both amplitude and frequency for each client)

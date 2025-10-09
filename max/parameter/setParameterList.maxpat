@@ -42,9 +42,8 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 409.0, 96.0, 160.0, 20.0 ],
-					"presentation_linecount" : 2,
-					"text" : "@param @mode @clientIds"
+					"patching_rect" : [ 409.0, 96.0, 212.0, 20.0 ],
+					"text" : "@param @mode @clientIds @groups"
 				}
 
 			}
@@ -79,8 +78,8 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 412.0, 121.0, 173.0, 22.0 ],
-					"text" : "patcherargs @mode beginning"
+					"patching_rect" : [ 412.0, 121.0, 235.0, 22.0 ],
+					"text" : "patcherargs @mode beginning @groups 0"
 				}
 
 			}
@@ -103,7 +102,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 653.0, 220.0, 72.0, 22.0 ],
+					"patching_rect" : [ 653.0, 244.0, 72.0, 22.0 ],
 					"text" : "prepend set"
 				}
 
@@ -112,11 +111,11 @@
 				"box" : 				{
 					"id" : "obj-8",
 					"maxclass" : "newobj",
-					"numinlets" : 2,
-					"numoutlets" : 2,
-					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 653.0, 188.0, 109.0, 22.0 ],
-					"text" : "routepass clientIds"
+					"numinlets" : 3,
+					"numoutlets" : 3,
+					"outlettype" : [ "", "", "" ],
+					"patching_rect" : [ 653.0, 188.0, 149.0, 22.0 ],
+					"text" : "routepass clientIds groups"
 				}
 
 			}
@@ -134,7 +133,7 @@
 			}
 , 			{
 				"box" : 				{
-					"comment" : "values, @param, @clientIds, clear",
+					"comment" : "values, @param, @clientIds, @groups, clear",
 					"id" : "obj-29",
 					"index" : 1,
 					"maxclass" : "inlet",
@@ -362,6 +361,13 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-24", 0 ],
+					"source" : [ "obj-8", 2 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-9", 0 ],
 					"source" : [ "obj-8", 1 ]
 				}
 
