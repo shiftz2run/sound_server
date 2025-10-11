@@ -16,20 +16,32 @@ socket.on("setUserId", (id) => {
   console.log("User ID set to:", userId);
 });
 
-const startButton = document.querySelector("#startText");
+const startButton = document.querySelector("#startButton");
 
-// Button click
-window.addEventListener("click", () => {
+// Handle button click/tap - use both events for iOS compatibility
+function handleStart(event) {
+  event.preventDefault(); // Prevent double-firing on iOS
+
   if (!oscillator || !oscillator.isStarted) {
     const started = initAudio();
+
     // Send active status to server
     if (started) {
       socket.emit("setActive", true);
     }
   }
-  // Hide the text after click
-  if (startButton) startButton.style.display = "none";
-});
+
+  // Hide the button after activation
+  if (startButton) {
+    startButton.style.display = "none";
+  }
+}
+
+// Attach event listeners when button is ready
+if (startButton) {
+  startButton.addEventListener("click", handleStart);
+  startButton.addEventListener("touchend", handleStart);
+}
 
 // Initialize audio context and oscillator
 function initAudio() {
