@@ -96,6 +96,25 @@ function sendToDroidPad(data) {
   });
 }
 
+/**
+ * Helper to validate and send control value to DroidPad
+ * @param {string} id - Control ID
+ * @param {string} type - Control type
+ * @param {string} valueKey - Key name for the value (e.g., "state", "value")
+ * @param {*} value - Value to send
+ */
+function sendControlValue(id, type, valueKey, value) {
+  if (!id || value === undefined) {
+    return;
+  }
+
+  sendToDroidPad({
+    id,
+    type,
+    [valueKey]: value,
+  });
+}
+
 // ===== UDP Event Handlers =====
 server.on("error", (err) => {
   console.log(`UDP server error: ${err.message}`);
@@ -156,10 +175,6 @@ server.on("listening", () => {
  * Usage from Max: setLED led1 ON
  */
 maxApi.addHandler("setLED", (ledId, state) => {
-  if (!ledId || !state) {
-    return;
-  }
-
   const validStates = ["ON", "OFF", "BLINK"];
   const upperState = state.toString().toUpperCase();
 
@@ -167,13 +182,33 @@ maxApi.addHandler("setLED", (ledId, state) => {
     return;
   }
 
-  const data = {
-    id: ledId,
-    type: "LED",
-    state: upperState,
-  };
+  sendControlValue(ledId, "LED", "state", upperState);
+});
 
-  sendToDroidPad(data);
+/**
+ * Set SWITCH state on DroidPad
+ * Usage from Max: setSwitch switch1 1 (or 0)
+ */
+maxApi.addHandler("setSwitch", (switchId, state) => {
+  const numValue = Number(state);
+  if (isNaN(numValue)) {
+    return;
+  }
+
+  sendControlValue(switchId, "SWITCH", "state", Boolean(numValue));
+});
+
+/**
+ * Set SLIDER value on DroidPad
+ * Usage from Max: setSlider slider1 0.5
+ */
+maxApi.addHandler("setSlider", (sliderId, value) => {
+  const numValue = parseFloat(value);
+  if (isNaN(numValue)) {
+    return;
+  }
+
+  sendControlValue(sliderId, "SLIDER", "value", numValue);
 });
 
 /**
@@ -181,22 +216,12 @@ maxApi.addHandler("setLED", (ledId, state) => {
  * Usage from Max: setGauge gauge1 75
  */
 maxApi.addHandler("setGauge", (gaugeId, value) => {
-  if (!gaugeId || value === undefined) {
-    return;
-  }
-
   const numValue = parseFloat(value);
   if (isNaN(numValue)) {
     return;
   }
 
-  const data = {
-    id: gaugeId,
-    type: "GAUGE",
-    value: numValue,
-  };
-
-  sendToDroidPad(data);
+  sendControlValue(gaugeId, "GAUGE", "value", numValue);
 });
 
 /**
