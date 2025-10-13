@@ -41,7 +41,7 @@ function registerMaxHandlers(
         param,
         values,
         mode,
-        clientIds ? [clientIds] : null,
+        clientIds,
         groups,
         delay,
       );
@@ -64,13 +64,7 @@ function registerMaxHandlers(
       groups = 0,
       delay = 0,
     } = paramDict;
-    return setFFTDataForClients(
-      values,
-      mode,
-      clientIds ? [clientIds] : null,
-      groups,
-      delay,
-    );
+    return setFFTDataForClients(values, mode, clientIds, groups, delay);
   });
 
   // Note trigger handler - paramDict: { frequency?: <value>, amplitude?: <value>, ..., clientIds?: <optional> }

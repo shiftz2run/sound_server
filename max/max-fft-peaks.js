@@ -210,7 +210,6 @@ function list() {
  */
 function msg_int(n) {
   N = Math.max(1, n);
-  post("N set to " + N + "\n");
 }
 
 /**
