@@ -50,16 +50,22 @@ function setParametersForClients(parameters, clientIds = null) {
     return results;
   }
 
+  // Normalize clientIds to array
+  let normalizedClientIds = clientIds;
+  if (clientIds !== null && !Array.isArray(clientIds)) {
+    normalizedClientIds = [clientIds];
+  }
+
   // Determine target clients (indexes)
   let targetIndexes = [];
-  if (clientIds === null) {
+  if (normalizedClientIds === null) {
     // Apply to all connected clients
     targetIndexes = Object.keys(users).filter(
       (index) => users[index].connected,
     );
   } else {
     // Apply to specific clients (only if connected)
-    targetIndexes = clientIds.filter(
+    targetIndexes = normalizedClientIds.filter(
       (index) => users[index] && users[index].connected,
     );
   }
@@ -117,9 +123,17 @@ function setParametersListForClients(
   groups = 0,
   delay = 0,
 ) {
+  // Normalize clientIds to array
+  let normalizedClientIds = clientIds;
+  if (clientIds !== null && !Array.isArray(clientIds)) {
+    normalizedClientIds = [clientIds];
+  }
+
   // Get current connected clients (indexes)
-  const availableClients = clientIds
-    ? clientIds.filter((index) => users[index] && users[index].connected)
+  const availableClients = normalizedClientIds
+    ? normalizedClientIds.filter(
+        (index) => users[index] && users[index].connected,
+      )
     : Object.keys(users).filter((index) => users[index].connected);
 
   // Distribute values to clients
@@ -181,12 +195,18 @@ function setFFTDataForClients(
     });
   }
 
-  // Get current connected clients
-  const availableClients = clientIds
-    ? clientIds.filter((index) => users[index] && users[index].connected)
-    : Object.keys(users).filter((index) => users[index].connected);
-  
+  // Normalize clientIds to array
+  let normalizedClientIds = clientIds;
+  if (clientIds !== null && !Array.isArray(clientIds)) {
+    normalizedClientIds = [clientIds];
+  }
 
+  // Get current connected clients
+  const availableClients = normalizedClientIds
+    ? normalizedClientIds.filter(
+        (index) => users[index] && users[index].connected,
+      )
+    : Object.keys(users).filter((index) => users[index].connected);
 
   // Distribute FFT pairs to clients using existing distribution logic
   const assignments = distributeValuesToClients(
