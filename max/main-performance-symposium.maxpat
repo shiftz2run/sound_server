@@ -4820,7 +4820,7 @@
 					"outlettype" : [ "", "int", "", "" ],
 					"parameter_enable" : 0,
 					"patching_rect" : [ 46.7741938829422, 1853.225819706916809, 269.0, 37.0 ],
-					"text" : "websocket connection available at: http://192.168.1.84:8086"
+					"text" : "websocket connection available at: http://147.87.43.190:8086"
 				}
 
 			}
@@ -6895,8 +6895,6 @@
 										"args" : [ 8000, "index.html", 5000 ],
 										"autostart" : 0,
 										"defer" : 0,
-										"node_bin_path" : "",
-										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,
@@ -7200,8 +7198,6 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
-						"node_bin_path" : "",
-						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -7272,6 +7268,18 @@
 			}
 , 			{
 				"box" : 				{
+					"id" : "obj-149",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 48.546506762504578, 115.0, 110.0, 22.0 ],
+					"text" : "prepend readfolder"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"aspect" : 6,
 					"background" : 1,
 					"id" : "obj-254",
@@ -7279,7 +7287,7 @@
 					"maxclass" : "mira.frame",
 					"numinlets" : 0,
 					"numoutlets" : 0,
-					"patching_rect" : [ 2688.709696650505066, 1748.387109279632568, 1209.523797988891602, 492.857138156890869 ],
+					"patching_rect" : [ 2688.709696650505066, 1748.387109279632568, 693.249618356231395, 492.857138156890869 ],
 					"tabname" : "SquareClicks",
 					"taborder" : 1
 				}
@@ -7295,21 +7303,9 @@
 					"maxclass" : "mira.frame",
 					"numinlets" : 0,
 					"numoutlets" : 0,
-					"patching_rect" : [ 577.419358968734741, 1732.258076906204224, 1150.0, 469.0 ],
+					"patching_rect" : [ 577.419358968734741, 1732.258076906204224, 659.692324280738831, 469.0 ],
 					"tabname" : "FFT",
 					"taborder" : 1
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"id" : "obj-149",
-					"maxclass" : "newobj",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 48.546506762504578, 115.0, 110.0, 22.0 ],
-					"text" : "prepend readfolder"
 				}
 
 			}
