@@ -3,29 +3,19 @@ class WebAudioOscillator {
     this.context = context;
     this.oscillator = null;
     this.gainNode = null;
-    this.filterNode = null;
     this.isStarted = false;
 
     // Parameters
-    this.frequency = 200;
-    this.targetFrequency = 200;
+    this.frequency = 440;
+    this.targetFrequency = 440;
     this.amplitude = 0;
     this.targetAmplitude = 0;
     this.currentWaveform = "sine";
     this.customWaveformData = null;
 
-    // Filter parameters
-    this.filterFrequency = 3000;
-    this.targetFilterFrequency = 3000;
-    this.filterQ = 1;
-    this.targetFilterQ = 1;
-    this.filterEnabled = true;
-
     // Smoothing
     this.frequencySmoothing = 0;
     this.amplitudeSmoothing = 0;
-    this.filterFrequencySmoothing = 0;
-    this.filterQSmoothing = 0;
 
     // Envelope (stored internally in seconds for Web Audio API)
     this.attackTime = 0.1; // 100ms default
@@ -54,28 +44,9 @@ class WebAudioOscillator {
 
     this.oscillator = this.createOscillatorWithWaveform();
     this.gainNode = this.context.createGain();
-    this.filterNode = this.context.createBiquadFilter();
-
-    // Configure filter
-    this.filterNode.type = "lowpass";
-    this.filterNode.frequency.setValueAtTime(
-      this.filterFrequency,
-      this.context.currentTime,
-    );
-    this.filterNode.Q.setValueAtTime(this.filterQ, this.context.currentTime);
-
     this.gainNode.gain.setValueAtTime(0, this.context.currentTime);
 
-    // Connect audio chain: oscillator -> filter -> gain -> destination
-    this.oscillator.connect(this.filterNode);
-
-    if (this.filterEnabled) {
-      this.filterNode.connect(this.gainNode);
-    } else {
-      // Bypass filter when disabled
-      this.oscillator.connect(this.gainNode);
-    }
-
+    this.oscillator.connect(this.gainNode);
     this.gainNode.connect(this.context.destination);
 
     this.applyADS();
@@ -89,10 +60,6 @@ class WebAudioOscillator {
       this.oscillator.stop();
       this.oscillator.disconnect();
       this.oscillator = null;
-    }
-    if (this.filterNode) {
-      this.filterNode.disconnect();
-      this.filterNode = null;
     }
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
@@ -147,12 +114,7 @@ class WebAudioOscillator {
 
     this.oscillator = this.createOscillatorWithWaveform();
     this.oscillator.frequency.value = currentFreq;
-    this.oscillator.connect(this.filterNode);
-
-    if (!this.filterEnabled) {
-      this.oscillator.connect(this.gainNode);
-    }
-
+    this.oscillator.connect(this.gainNode);
     this.oscillator.start(currentTime + 0.1);
   }
 
@@ -192,8 +154,6 @@ class WebAudioOscillator {
 
     let freqChanged = false;
     let ampChanged = false;
-    let filterFreqChanged = false;
-    let filterQChanged = false;
 
     if (Math.abs(this.frequency - this.targetFrequency) > 0.1) {
       this.frequency = this.smoothValue(
@@ -213,24 +173,6 @@ class WebAudioOscillator {
       ampChanged = true;
     }
 
-    if (Math.abs(this.filterFrequency - this.targetFilterFrequency) > 0.1) {
-      this.filterFrequency = this.smoothValue(
-        this.filterFrequency,
-        this.targetFilterFrequency,
-        this.filterFrequencySmoothing,
-      );
-      filterFreqChanged = true;
-    }
-
-    if (Math.abs(this.filterQ - this.targetFilterQ) > 0.001) {
-      this.filterQ = this.smoothValue(
-        this.filterQ,
-        this.targetFilterQ,
-        this.filterQSmoothing,
-      );
-      filterQChanged = true;
-    }
-
     if (freqChanged && this.oscillator) {
       this.oscillator.frequency.setValueAtTime(
         this.frequency,
@@ -243,17 +185,6 @@ class WebAudioOscillator {
         this.amplitude,
         this.context.currentTime,
       );
-    }
-
-    if (filterFreqChanged && this.filterNode) {
-      this.filterNode.frequency.setValueAtTime(
-        this.filterFrequency,
-        this.context.currentTime,
-      );
-    }
-
-    if (filterQChanged && this.filterNode) {
-      this.filterNode.Q.setValueAtTime(this.filterQ, this.context.currentTime);
     }
 
     this.animationId = requestAnimationFrame(() => this.animate());
@@ -320,41 +251,6 @@ class WebAudioOscillator {
 
   setAdsTriggerMode(value) {
     this.adsTriggerMode = value;
-  }
-
-  // Filter setters
-  setFilterFrequency(value) {
-    this.targetFilterFrequency = value;
-  }
-
-  setFilterQ(value) {
-    this.targetFilterQ = value;
-  }
-
-  setFilterEnabled(value) {
-    this.filterEnabled = value;
-
-    // If already started, reconnect the audio chain
-    if (this.isStarted && this.oscillator && this.filterNode && this.gainNode) {
-      this.oscillator.disconnect();
-      this.filterNode.disconnect();
-
-      this.oscillator.connect(this.filterNode);
-
-      if (this.filterEnabled) {
-        this.filterNode.connect(this.gainNode);
-      } else {
-        this.oscillator.connect(this.gainNode);
-      }
-    }
-  }
-
-  setFilterFrequencySmoothing(value) {
-    this.filterFrequencySmoothing = value;
-  }
-
-  setFilterQSmoothing(value) {
-    this.filterQSmoothing = value;
   }
 
   // Utility method to update multiple parameters at once
