@@ -9,7 +9,7 @@ class WebAudioOscillator {
     // Parameters
     this.frequency = 200;
     this.targetFrequency = 200;
-    this.amplitude = 0.2;
+    this.amplitude = 0;
     this.targetAmplitude = 0.2;
     this.currentWaveform = "sine";
     this.customWaveformData = null;
@@ -55,24 +55,27 @@ class WebAudioOscillator {
     this.oscillator = this.createOscillatorWithWaveform();
     this.gainNode = this.context.createGain();
     this.filterNode = this.context.createBiquadFilter();
-    
+
     // Configure filter
     this.filterNode.type = "lowpass";
-    this.filterNode.frequency.setValueAtTime(this.filterFrequency, this.context.currentTime);
+    this.filterNode.frequency.setValueAtTime(
+      this.filterFrequency,
+      this.context.currentTime,
+    );
     this.filterNode.Q.setValueAtTime(this.filterQ, this.context.currentTime);
-    
+
     this.gainNode.gain.setValueAtTime(0, this.context.currentTime);
 
     // Connect audio chain: oscillator -> filter -> gain -> destination
     this.oscillator.connect(this.filterNode);
-    
+
     if (this.filterEnabled) {
       this.filterNode.connect(this.gainNode);
     } else {
       // Bypass filter when disabled
       this.oscillator.connect(this.gainNode);
     }
-    
+
     this.gainNode.connect(this.context.destination);
 
     this.applyADS();
@@ -145,11 +148,11 @@ class WebAudioOscillator {
     this.oscillator = this.createOscillatorWithWaveform();
     this.oscillator.frequency.value = currentFreq;
     this.oscillator.connect(this.filterNode);
-    
+
     if (!this.filterEnabled) {
       this.oscillator.connect(this.gainNode);
     }
-    
+
     this.oscillator.start(currentTime + 0.1);
   }
 
@@ -250,10 +253,7 @@ class WebAudioOscillator {
     }
 
     if (filterQChanged && this.filterNode) {
-      this.filterNode.Q.setValueAtTime(
-        this.filterQ,
-        this.context.currentTime,
-      );
+      this.filterNode.Q.setValueAtTime(this.filterQ, this.context.currentTime);
     }
 
     this.animationId = requestAnimationFrame(() => this.animate());
@@ -333,14 +333,14 @@ class WebAudioOscillator {
 
   setFilterEnabled(value) {
     this.filterEnabled = value;
-    
+
     // If already started, reconnect the audio chain
     if (this.isStarted && this.oscillator && this.filterNode && this.gainNode) {
       this.oscillator.disconnect();
       this.filterNode.disconnect();
-      
+
       this.oscillator.connect(this.filterNode);
-      
+
       if (this.filterEnabled) {
         this.filterNode.connect(this.gainNode);
       } else {
