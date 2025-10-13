@@ -19,7 +19,7 @@ class WebAudioOscillator {
     this.targetFilterFrequency = 3000;
     this.filterQ = 1;
     this.targetFilterQ = 1;
-    this.filterEnabled = false;
+    this.filterEnabled = true;
 
     // Smoothing
     this.frequencySmoothing = 0;
