@@ -14,15 +14,39 @@
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-6",
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 114.0, 292.0, 175.0, 22.0 ],
+					"text" : "vexpr $f1 * $f2 @maxsize 2048"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-4",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 592.0, 85.0, 212.0, 22.0 ],
+					"saved_object_attributes" : 					{
+						"attr_comment" : [ "Multiplier", "for", "Bins" ]
+					}
+,
+					"text" : "in 3 @attr_comment Multiplier for Bins"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-2",
 					"maxclass" : "newobj",
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 247.0, 630.0, 35.0, 22.0 ],
-					"saved_object_attributes" : 					{
-						"attr_comment" : ""
-					}
-,
 					"text" : "out 2"
 				}
 
@@ -158,6 +182,10 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 95.0, 630.0, 35.0, 22.0 ],
+					"saved_object_attributes" : 					{
+						"attr_comment" : ""
+					}
+,
 					"text" : "out 1"
 				}
 
@@ -259,8 +287,22 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-6", 1 ],
+					"source" : [ "obj-4", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-8", 0 ],
 					"source" : [ "obj-52", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-8", 0 ],
+					"source" : [ "obj-6", 0 ]
 				}
 
 			}
@@ -280,7 +322,7 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-8", 0 ],
+					"destination" : [ "obj-6", 0 ],
 					"source" : [ "obj-9", 0 ]
 				}
 
