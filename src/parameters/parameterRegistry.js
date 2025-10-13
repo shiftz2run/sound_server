@@ -15,7 +15,7 @@ const PARAMETER_SCHEMA = {
   amplitude: {
     type: "number",
     min: 0,
-    max: 1,
+    max: 5,
     default: 0,
     unit: "linear",
     category: "oscillator",
