@@ -185,6 +185,8 @@ function setFFTDataForClients(
   const availableClients = clientIds
     ? clientIds.filter((index) => users[index] && users[index].connected)
     : Object.keys(users).filter((index) => users[index].connected);
+  
+
 
   // Distribute FFT pairs to clients using existing distribution logic
   const assignments = distributeValuesToClients(

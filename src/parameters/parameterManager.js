@@ -75,6 +75,7 @@ function distributeValuesToClients(
   }
 
   let targetClients = [...clientIds];
+  console.log(targetClients);
 
   // Apply distribution mode
   switch (mode) {
