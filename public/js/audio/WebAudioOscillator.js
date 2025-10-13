@@ -6,10 +6,10 @@ class WebAudioOscillator {
     this.isStarted = false;
 
     // Parameters
-    this.frequency = 440;
-    this.targetFrequency = 440;
-    this.amplitude = 0.5;
-    this.targetAmplitude = 0.5;
+    this.frequency = 200;
+    this.targetFrequency = 200;
+    this.amplitude = 0.3;
+    this.targetAmplitude = 0.3;
     this.currentWaveform = "sine";
     this.customWaveformData = null;
 
