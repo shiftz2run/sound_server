@@ -1,29 +1,68 @@
 #!/usr/bin/env node
 //
-// make_qr_watch_ip.js
+// qrcodegen.js
 // Usage:
-//   node make_qr_watch_ip.js [port] [path] [interval_ms]
+//   node qrcodegen.js <port> <path> <output_file> [interval_ms]
 // Examples:
-//   node make_qr_watch_ip.js
-//   node make_qr_watch_ip.js 8000 osc.html 5000
+//   node qrcodegen.js 8000 /index.html ../../assets/qr_osc.png 3000
+//   node qrcodegen.js 8001 none ../../assets/qr_control.png 5000
 //
 
 const os = require("os");
 const QRCode = require("qrcode");
 const maxApi = require("max-api");
 
-// positional args
+// positional args - robust parsing for Max MSP compatibility
 const argv = process.argv.slice(2);
+
+// Debug logging
+console.log("Full process.argv:", process.argv);
+console.log("Arguments received:", argv);
+
+// Help
 if (argv[0] === "-h" || argv[0] === "--help" || argv[0] === "help") {
-  console.log("Usage: node make_qr_watch_ip.js [port] [path] [interval_ms]");
+  console.log(
+    "Usage: node qrcodegen.js [port] [path] [output_file] [interval_ms]",
+  );
+  console.log("  port: Server port number (default: 8000)");
+  console.log("  path: URL path or 'none' for no path (default: 'index.html')");
+  console.log(
+    "  output_file: Output PNG file path (default: '../../assets/qr.png')",
+  );
+  console.log("  interval_ms: IP check interval in ms (default: 3000)");
+  console.log("\nMax MSP Usage:");
+  console.log(
+    "  With autostart: @autostart 1 @args 8000 /index.html qr.png 3000",
+  );
+  console.log("  Manual start: [script start 8000 /index.html qr.png 3000]");
   process.exit(0);
 }
-const port = argv[0] ? Number(argv[0]) : 8000;
-const rawPath = argv[1] ? String(argv[1]) : "";
-const intervalMs = argv[2] ? Math.max(500, Number(argv[2])) : 3000;
+
+// Parse with defaults (allows script to work even if args not passed from Max)
+let port = argv[0] ? Number(argv[0]) : 8000;
+const rawPath = argv[1] ? String(argv[1]) : "index.html";
+const outputFile = argv[2] ? String(argv[2]) : "../../assets/qr.png";
+const intervalMs = argv[3] ? Math.max(500, Number(argv[3])) : 3000;
+
+// Validate port
+if (isNaN(port) || port <= 0 || port > 65535) {
+  console.error("Error: Invalid port number:", argv[0]);
+  console.error("Using default port 8000");
+  port = 8000;
+}
+
+// Log configuration
+console.log("=== QR Code Generator Configuration ===");
+console.log("Port:", port);
+console.log("Path:", rawPath);
+console.log("Output:", outputFile);
+console.log("Interval:", intervalMs, "ms");
+console.log("======================================");
 
 function normalizePath(p) {
-  if (!p) return "";
+  if (!p || p.trim() === "" || p.toLowerCase() === "none") {
+    return "";
+  }
   return p.startsWith("/") ? p : "/" + p;
 }
 
@@ -48,10 +87,12 @@ function getLocalIPv4() {
   return null;
 }
 
-async function generate(url, outPng = "../../assets/qr.png") {
+async function generate(url) {
   try {
-    await QRCode.toFile(outPng, url, { errorCorrectionLevel: "quartile" });
-    console.log(new Date().toISOString(), `Saved: ${outPng}`);
+    await QRCode.toFile(outputFile, url, { errorCorrectionLevel: "quartile" });
+    console.log(new Date().toISOString(), `Saved: ${outputFile}`);
+    // Output bang to Max MSP to trigger QR image reload
+    maxApi.outlet("bang");
   } catch (err) {
     console.error("Failed to write PNG:", err);
   }
@@ -84,16 +125,21 @@ async function generate(url, outPng = "../../assets/qr.png") {
       const url = buildUrl(ip);
       console.log(new Date().toISOString(), `Detected IP: ${ip}`);
       await generate(url);
-      maxApi.outlet("bang");
       lastIp = ip;
     }
   }
+
+  // Max API handler for manual refresh
+  maxApi.addHandler("bang", async () => {
+    console.log(new Date().toISOString(), "Manual refresh triggered");
+    await check(true);
+  });
 
   // initial run
   await check(true);
 
   console.log(
-    `Watching for IP changes every ${intervalMs} ms (port=${port}, path=${path}). Ctrl+C to stop.`,
+    `Watching for IP changes every ${intervalMs} ms (port=${port}, path=${path}, output=${outputFile}). Ctrl+C to stop.`,
   );
   setInterval(() => {
     check(false).catch((err) => console.error("Watcher error:", err));
