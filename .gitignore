@@ -2,7 +2,8 @@
 node_modules/
 
 # LocalQR Code
-qr.png
+public-qr.png
+performer-qr.png
 
 # Temporary files
 temp/
