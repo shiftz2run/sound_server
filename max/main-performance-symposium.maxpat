@@ -14,6 +14,31 @@
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-383",
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 0,
+					"patching_rect" : [ 94.666669487953186, 478.666680932044983, 35.0, 22.0 ],
+					"text" : "dac~"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-382",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 168.000005006790161, 116.000003457069397, 63.0, 22.0 ],
+					"presentation" : 1,
+					"presentation_rect" : [ 902.666693568229675, 148.666671752929688, 63.0, 22.0 ],
+					"text" : "readfolder"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-329",
 					"maxclass" : "comment",
 					"numinlets" : 1,
@@ -394,7 +419,7 @@
 										"watch" : 0
 									}
 ,
-									"text" : "node.script qrcodegen.js @args 8086  ../../assets/performer-qr.png 5000",
+									"text" : "node.script qrcodegen.js @args 8086 ../../assets/performer-qr.png 5000",
 									"textfile" : 									{
 										"filename" : "qrcodegen.js",
 										"flags" : 0,
@@ -575,7 +600,6 @@
 					}
 ,
 					"patching_rect" : [ 43.0, 2057.07534658908844, 173.0, 22.0 ],
-					"presentation_linecount" : 3,
 					"text" : "p make-qr-code-for-performers"
 				}
 
@@ -649,7 +673,7 @@
 					"patching_rect" : [ 643.956075429916382, 2101.099003791809082, 37.362639188766479, 20.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ -569.333350300788879, 150.166676759719849, 37.362639188766479, 20.0 ],
-					"text" : "11"
+					"text" : "5"
 				}
 
 			}
@@ -4080,7 +4104,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 48.546506762504578, 54.0, 117.0, 22.0 ],
+					"patching_rect" : [ 48.546506762504578, -37.333334445953369, 117.0, 22.0 ],
 					"text" : "loadmess soundfiles"
 				}
 
@@ -4933,7 +4957,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 893.548393487930298, 2595.161308884620667, 50.0, 22.0 ],
-					"text" : "11"
+					"text" : "0"
 				}
 
 			}
@@ -5924,6 +5948,8 @@
 					"outlettype" : [ "", "bang" ],
 					"parameter_enable" : 1,
 					"patching_rect" : [ 834.285734176635742, 2062.857192039489746, 50.0, 22.0 ],
+					"presentation" : 1,
+					"presentation_rect" : [ -377.333344578742981, 96.833341836929321, 50.0, 22.0 ],
 					"saved_attribute_attributes" : 					{
 						"valueof" : 						{
 							"parameter_invisible" : 1,
@@ -5977,6 +6003,8 @@
 					"outlettype" : [ "", "bang" ],
 					"parameter_enable" : 1,
 					"patching_rect" : [ 834.285734176635742, 2130.000050783157349, 50.000000357627869, 22.0 ],
+					"presentation" : 1,
+					"presentation_rect" : [ -377.333344578742981, 164.833343863487244, 50.000000357627869, 22.0 ],
 					"saved_attribute_attributes" : 					{
 						"valueof" : 						{
 							"parameter_invisible" : 1,
@@ -6122,7 +6150,7 @@
 					"outlettype" : [ "", "int", "", "" ],
 					"parameter_enable" : 0,
 					"patching_rect" : [ 46.7741938829422, 1853.225819706916809, 269.0, 37.0 ],
-					"text" : "websocket connection available at: http://147.87.42.161:8086"
+					"text" : "websocket connection available at: http://192.168.1.84:8086"
 				}
 
 			}
@@ -8067,7 +8095,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "jit_matrix" ],
 									"patching_rect" : [ 437.57478541135788, 130.351686477661133, 287.610642611980438, 287.610642611980438 ],
-									"pic" : "notfound"
+									"pic" : "Macintosh HD:/Users/noeorlando/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/public-qr.png"
 								}
 
 							}
@@ -8383,7 +8411,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "jit_matrix" ],
 					"patching_rect" : [ 1472.0, -471.0, 358.0, 358.0 ],
-					"pic" : "notfound",
+					"pic" : "Macintosh HD:/Users/noeorlando/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets/public-qr.png",
 					"presentation" : 1,
 					"presentation_rect" : [ 1204.000035881996155, -171.166661500930786, 358.0, 358.0 ]
 				}
@@ -8598,6 +8626,18 @@
 			}
 , 			{
 				"box" : 				{
+					"id" : "obj-348",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 520.879145999999992, 2231.868241000000125, 41.0, 22.0 ],
+					"text" : "set $1"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"aspect" : 6,
 					"background" : 1,
 					"id" : "obj-254",
@@ -8605,9 +8645,9 @@
 					"maxclass" : "mira.frame",
 					"numinlets" : 0,
 					"numoutlets" : 0,
-					"patching_rect" : [ 2689.011120438575745, 1757.307728111743927, 1189.011047124862671, 484.450623214244843 ],
+					"patching_rect" : [ 2689.333413481712341, 1757.333385705947876, 1165.666586518287659, 477.666614294052124 ],
 					"presentation" : 1,
-					"presentation_rect" : [ -625.333351969718933, 266.666674613952637, 1189.011047124862671, 484.450623214244843 ],
+					"presentation_rect" : [ -625.333351969718933, 264.00000786781311, 1156.00003445148468, 472.000014066696167 ],
 					"tabname" : "SquareClicks",
 					"taborder" : 1
 				}
@@ -8623,23 +8663,11 @@
 					"maxclass" : "mira.frame",
 					"numinlets" : 0,
 					"numoutlets" : 0,
-					"patching_rect" : [ 589.011017799377441, 1741.758326888084412, 1126.79122006893158, 451.308533132076263 ],
+					"patching_rect" : [ 589.333350896835327, 1741.333385229110718, 1133.52383017539978, 462.666614770889282 ],
 					"presentation" : 1,
-					"presentation_rect" : [ -625.333351969718933, -209.833333969116211, 1126.79122006893158, 451.308533132076263 ],
+					"presentation_rect" : [ -625.333351969718933, -209.33333957195282, 1136.000033855438232, 457.333346962928772 ],
 					"tabname" : "FFT",
 					"taborder" : 1
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"id" : "obj-348",
-					"maxclass" : "message",
-					"numinlets" : 2,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 520.879145999999992, 2231.868241000000125, 41.0, 22.0 ],
-					"text" : "set $1"
 				}
 
 			}
@@ -9641,7 +9669,24 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-383", 1 ],
+					"order" : 1,
+					"source" : [ "obj-221", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-383", 0 ],
+					"order" : 2,
+					"source" : [ "obj-221", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-414", 1 ],
+					"order" : 0,
 					"source" : [ "obj-221", 0 ]
 				}
 
@@ -10169,6 +10214,15 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-321", 0 ],
+					"order" : 0,
+					"source" : [ "obj-315", 1 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-54", 0 ],
+					"order" : 1,
 					"source" : [ "obj-315", 1 ]
 				}
 
@@ -10517,6 +10571,13 @@
 				"patchline" : 				{
 					"destination" : [ "obj-11", 0 ],
 					"source" : [ "obj-38", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-140", 0 ],
+					"source" : [ "obj-382", 0 ]
 				}
 
 			}
@@ -11675,6 +11736,16 @@
 			"obj-81" : [ "button", "button", 0 ],
 			"obj-90" : [ "umenu[2]", "umenu[2]", 0 ],
 			"obj-91" : [ "umenu[3]", "umenu[3]", 0 ],
+			"parameterbanks" : 			{
+				"0" : 				{
+					"index" : 0,
+					"name" : "",
+					"parameters" : [ "-", "-", "-", "-", "-", "-", "-", "-" ],
+					"buttons" : [ "-", "-", "-", "-", "-", "-", "-", "-" ]
+				}
+
+			}
+,
 			"inherited_shortname" : 1
 		}
 ,
@@ -11737,6 +11808,13 @@
 				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/max",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "public-qr.png",
+				"bootpath" : "~/Schule/Studium/Projektwoche_Handy/Eigenes_Projekt/collab/sound_server/assets",
+				"patcherrelativepath" : "../assets",
+				"type" : "PNG",
 				"implicit" : 1
 			}
 , 			{
