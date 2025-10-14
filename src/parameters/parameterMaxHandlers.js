@@ -10,6 +10,7 @@ function registerMaxHandlers(
   setParametersListForClients,
   setFFTDataForClients,
   io,
+  users,
 ) {
   // Auto-generate all Max handlers
   Object.keys(PARAMETER_SCHEMA).forEach((param) => {
@@ -19,10 +20,7 @@ function registerMaxHandlers(
       console.log(
         `set${capitalize(param)}(value=${value}, clientIds=${clientIds})`,
       );
-      return setParametersForClients(
-        { [param]: value },
-        clientIds ? [clientIds] : null,
-      );
+      return setParametersForClients({ [param]: value }, clientIds);
     });
 
     // List parameter handler - paramDict: { values: <array>, mode?: <optional>, clientIds?: <optional>, groups?: <optional>, delay?: <optional> }
@@ -52,7 +50,7 @@ function registerMaxHandlers(
   // All parameter keys are passed directly in the dict, clientIds is extracted if present
   maxApi.addHandler("setParameters", (paramDict) => {
     const { clientIds, ...params } = paramDict;
-    return setParametersForClients(params, clientIds ? [clientIds] : null);
+    return setParametersForClients(params, clientIds);
   });
 
   // FFT data distribution handler - paramDict: { values: <array>, mode?: <optional>, clientIds?: <optional>, groups?: <optional>, delay?: <optional> }
@@ -78,16 +76,27 @@ function registerMaxHandlers(
 
     // If parameters are provided, update them first
     if (Object.keys(params).length > 0) {
-      setParametersForClients(params, clientIds ? [clientIds] : null);
+      setParametersForClients(params, clientIds);
+    }
+
+    // Normalize clientIds to array for socket emission
+    let normalizedClientIds = clientIds;
+    if (clientIds !== null && !Array.isArray(clientIds)) {
+      normalizedClientIds = [clientIds];
     }
 
     // Send noteOn event to trigger envelope
-    if (!clientIds) {
+    if (!normalizedClientIds) {
       // Emit to all clients
       io.emit("noteOn", params);
     } else {
-      // Emit to specific client
-      io.to(clientIds).emit("noteOn", params);
+      // Emit to specific clients by their socket IDs
+      normalizedClientIds.forEach((clientId) => {
+        const user = users[clientId];
+        if (user && user.connected && user.socketId) {
+          io.to(user.socketId).emit("noteOn", params);
+        }
+      });
     }
 
     return { triggered: true, clients: clientIds || "all", params };
