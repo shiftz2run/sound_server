@@ -55,8 +55,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 110.0, 283.0, 61.0, 22.0 ],
-					"text" : "zl.slice 35"
+					"patching_rect" : [ 55.0, 279.0, 159.0, 22.0 ],
+					"text" : "zl.slice 35 @zlmaxsize 2049"
 				}
 
 			}
