@@ -16,6 +16,7 @@ const { registerMaxHandlers } = require("./parameters/parameterMaxHandlers");
 const CONFIG = {
   SERVER_PORT: 8000,
   CLIENT_LIST_UPDATE_INTERVAL: 5000, // milliseconds
+  MAX_OUTLET_DEBOUNCE_MS: 50, // Debounce delay for Max API outlet calls
 };
 
 const app = express();
@@ -26,6 +27,8 @@ let users = {}; // { clientIndex: { id, socketId, connected, active, frequency, 
 let clientIndexCounter = 1; // Auto-incrementing index for clients
 let socketToIndexMap = {}; // { socket.id: clientIndex } for fast lookups
 let debugMode = false;
+let updateClientListTimeout = null; // Debounce timer for client list updates
+let lastConnectedClientCount = 0; // Track last sent client count to avoid redundant updates
 
 // Get default parameters from schema
 const defaultParams = getDefaultParameters();
@@ -108,8 +111,7 @@ function setParametersForClients(parameters, clientIds = null) {
     });
   }
 
-  // Update web dashboard
-  updateClientListOutlet();
+  // No Max outlet update here - connection events and periodic updates handle it
 
   return results;
 }
@@ -256,21 +258,36 @@ function setFFTDataForClients(
   return results;
 }
 
-// Function to send updated client list to Max
-function updateClientListOutlet() {
-  // Get only connected clients
-  const connectedClientList = Object.keys(users).filter(
-    (index) => users[index].connected,
-  );
-  const connectedClientCount = connectedClientList.length;
+// Function to send updated client list to Max (debounced to prevent overwhelming Max API)
+function updateClientListOutlet(fullUpdate = false) {
+  // Clear any pending update
+  if (updateClientListTimeout) {
+    clearTimeout(updateClientListTimeout);
+  }
 
-  // Send connected client list and count to Max
-  maxApi.outlet("connectedClientList", connectedClientList);
-  maxApi.outlet("connectedClientCount", connectedClientCount);
-  maxApi.outlet(connectedClientCount); // Send just the number directly
+  // Schedule update after configurable delay
+  updateClientListTimeout = setTimeout(() => {
+    // Get only connected clients
+    const connectedClientList = Object.keys(users).filter(
+      (index) => users[index].connected,
+    );
+    const connectedClientCount = connectedClientList.length;
 
-  // Send users object directly with index as key
-  maxApi.outlet("usersObject", users);
+    // Only send client count if it changed or if full update requested
+    if (fullUpdate || connectedClientCount !== lastConnectedClientCount) {
+      maxApi.outlet("connectedClientList", connectedClientList);
+      maxApi.outlet("connectedClientCount", connectedClientCount);
+      maxApi.outlet(connectedClientCount); // Send just the number directly
+      lastConnectedClientCount = connectedClientCount;
+    }
+
+    // Only send full users object when necessary (connection/disconnection events)
+    if (fullUpdate) {
+      maxApi.outlet("usersObject", users);
+    }
+
+    updateClientListTimeout = null;
+  }, CONFIG.MAX_OUTLET_DEBOUNCE_MS);
 }
 
 // ===== Max API Handlers =====
@@ -381,7 +398,7 @@ io.on("connection", (socket) => {
 
   socketToIndexMap[socket.id] = clientIndex;
 
-  updateClientListOutlet();
+  updateClientListOutlet(true); // Full update on connection
 
   // Send initial params using bulk update
   socket.emit("setParameters", defaultParams);
@@ -403,7 +420,7 @@ io.on("connection", (socket) => {
     const clientIndex = socketToIndexMap[socket.id];
     if (clientIndex && users[clientIndex]) {
       users[clientIndex].active = Boolean(isActive);
-      updateClientListOutlet();
+      updateClientListOutlet(true); // Full update when activation changes
     }
   });
 
@@ -413,14 +430,14 @@ io.on("connection", (socket) => {
       users[clientIndex].connected = false;
       users[clientIndex].active = false;
       delete socketToIndexMap[socket.id];
-      updateClientListOutlet();
+      updateClientListOutlet(true); // Full update on disconnection
     }
   });
 });
 
 // Optional: Add a periodic update every few seconds as backup
 setInterval(() => {
-  updateClientListOutlet();
+  updateClientListOutlet(true); // Periodic full updates
 }, CONFIG.CLIENT_LIST_UPDATE_INTERVAL);
 
 server.listen(CONFIG.SERVER_PORT, () =>
