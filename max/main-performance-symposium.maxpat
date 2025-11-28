@@ -9,50 +9,28 @@
             "modernui": 1
         },
         "classnamespace": "box",
-        "rect": [ 34.0, 87.0, 1372.0, 779.0 ],
+        "rect": [ 34.0, 87.0, 987.0, 779.0 ],
         "boxes": [
             {
                 "box": {
-                    "format": 6,
-                    "id": "obj-218",
-                    "maxclass": "flonum",
+                    "id": "obj-71",
+                    "maxclass": "button",
                     "numinlets": 1,
-                    "numoutlets": 2,
-                    "outlettype": [ "", "bang" ],
+                    "numoutlets": 1,
+                    "outlettype": [ "bang" ],
                     "parameter_enable": 1,
-                    "patching_rect": [ 3261.363605260849, 645.4545392990112, 50.0, 22.0 ],
+                    "patching_rect": [ 3394.0, 464.0, 24.0, 24.0 ],
                     "saved_attribute_attributes": {
                         "valueof": {
-                            "parameter_invisible": 1,
-                            "parameter_longname": "number[20]",
+                            "parameter_enum": [ "off", "on" ],
+                            "parameter_longname": "button[15]",
+                            "parameter_mmax": 1,
                             "parameter_modmode": 0,
-                            "parameter_shortname": "number[20]",
-                            "parameter_type": 3
+                            "parameter_shortname": "button[15]",
+                            "parameter_type": 2
                         }
                     },
-                    "varname": "number[20]"
-                }
-            },
-            {
-                "box": {
-                    "id": "obj-195",
-                    "maxclass": "newobj",
-                    "numinlets": 2,
-                    "numoutlets": 2,
-                    "outlettype": [ "float", "" ],
-                    "patching_rect": [ 3281.8181505203247, 577.2727217674255, 35.0, 22.0 ],
-                    "text": "timer"
-                }
-            },
-            {
-                "box": {
-                    "id": "obj-187",
-                    "maxclass": "newobj",
-                    "numinlets": 1,
-                    "numoutlets": 2,
-                    "outlettype": [ "bang", "bang" ],
-                    "patching_rect": [ 3295.454514026642, 504.54544973373413, 29.5, 22.0 ],
-                    "text": "b"
+                    "varname": "button[14]"
                 }
             },
             {
@@ -102,15 +80,14 @@
             {
                 "box": {
                     "convertobj": 1,
+                    "dontreplace": 1,
                     "id": "obj-63",
-                    "linecount": 5,
                     "maxclass": "message",
                     "numinlets": 2,
                     "numoutlets": 1,
                     "outlettype": [ "" ],
                     "parseobj": 1,
-                    "patching_rect": [ 4415.0, 542.0, 819.0, 76.0 ],
-                    "text": "message : \"Max API Message Request timed out. id: 5999\" stack : \"Error: Max API Message Request timed out. id: 5999\n    at makeError (/Applications/Max911.app/Contents/Resources/C74/packages/Node for Max/source/lib/api/index.js:10:14)\n    at Timeout._onTimeout (/Applications/Max911.app/Contents/Resources/C74/packages/Node for Max/source/lib/api/index.js:179:12)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)\" code : 2"
+                    "patching_rect": [ 4415.0, 542.0, 819.0, 22.0 ]
                 }
             },
             {
@@ -6582,13 +6559,13 @@
                     "saved_attribute_attributes": {
                         "valueof": {
                             "parameter_longname": "dial",
-                            "parameter_mmax": 27.0,
+                            "parameter_mmax": 1.0,
                             "parameter_modmode": 4,
                             "parameter_shortname": "dial",
                             "parameter_type": 1
                         }
                     },
-                    "size": 28.0,
+                    "size": 2.0,
                     "varname": "dial"
                 }
             },
@@ -7405,7 +7382,7 @@
                     "outlettype": [ "", "int", "", "" ],
                     "parameter_enable": 0,
                     "patching_rect": [ 46.7741938829422, 1853.2258197069168, 269.0, 37.0 ],
-                    "text": "websocket connection available at: http://192.168.1.83:8086"
+                    "text": "websocket connection available at: http://147.87.42.242:8086"
                 }
             },
             {
@@ -9550,6 +9527,7 @@
             },
             {
                 "box": {
+                    "contdata": 1,
                     "id": "obj-148",
                     "maxclass": "multislider",
                     "numinlets": 1,
@@ -9714,13 +9692,6 @@
             },
             {
                 "patchline": {
-                    "destination": [ "obj-187", 0 ],
-                    "order": 1,
-                    "source": [ "obj-11", 0 ]
-                }
-            },
-            {
-                "patchline": {
                     "destination": [ "obj-23", 0 ],
                     "order": 0,
                     "source": [ "obj-11", 1 ]
@@ -9736,7 +9707,6 @@
             {
                 "patchline": {
                     "destination": [ "obj-5", 0 ],
-                    "order": 0,
                     "source": [ "obj-11", 0 ]
                 }
             },
@@ -10218,18 +10188,6 @@
             },
             {
                 "patchline": {
-                    "destination": [ "obj-195", 1 ],
-                    "source": [ "obj-187", 1 ]
-                }
-            },
-            {
-                "patchline": {
-                    "destination": [ "obj-195", 0 ],
-                    "source": [ "obj-187", 0 ]
-                }
-            },
-            {
-                "patchline": {
                     "destination": [ "obj-6", 0 ],
                     "source": [ "obj-19", 0 ]
                 }
@@ -10320,12 +10278,6 @@
                 "patchline": {
                     "destination": [ "obj-344", 0 ],
                     "source": [ "obj-194", 0 ]
-                }
-            },
-            {
-                "patchline": {
-                    "destination": [ "obj-218", 0 ],
-                    "source": [ "obj-195", 0 ]
                 }
             },
             {
@@ -11480,6 +11432,14 @@
             {
                 "patchline": {
                     "destination": [ "obj-11", 0 ],
+                    "order": 0,
+                    "source": [ "obj-401", 0 ]
+                }
+            },
+            {
+                "patchline": {
+                    "destination": [ "obj-71", 0 ],
+                    "order": 1,
                     "source": [ "obj-401", 0 ]
                 }
             },
@@ -13188,7 +13148,6 @@
             "obj-192": [ "toggle[12]", "toggle[12]", 0 ],
             "obj-209": [ "slider[9]", "slider[6]", 0 ],
             "obj-211": [ "slider[10]", "slider[6]", 0 ],
-            "obj-218": [ "number[20]", "number[20]", 0 ],
             "obj-230": [ "slider[11]", "slider[6]", 0 ],
             "obj-232": [ "toggle[20]", "toggle[20]", 0 ],
             "obj-241": [ "toggle[23]", "toggle[12]", 0 ],
@@ -13262,6 +13221,7 @@
             "obj-640": [ "button[12]", "button[12]", 0 ],
             "obj-65::obj-503": [ "button[9]", "button[9]", 0 ],
             "obj-69": [ "button[13]", "button[13]", 0 ],
+            "obj-71": [ "button[15]", "button[15]", 0 ],
             "obj-8": [ "toggle[13]", "toggle[9]", 0 ],
             "obj-81": [ "button", "button", 0 ],
             "obj-87": [ "button[6]", "button[6]", 0 ],

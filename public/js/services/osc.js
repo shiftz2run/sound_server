@@ -7,6 +7,7 @@ const socket = io({
 let context;
 let oscillator;
 let userId = null;
+let noSleep = new NoSleep();
 
 // Register setUserId listener immediately so it catches the event from server
 socket.on("setUserId", (id) => {
@@ -29,6 +30,14 @@ function handleStart(event) {
     if (started) {
       socket.emit("setActive", true);
     }
+  }
+
+  // Enable NoSleep to prevent screen dimming
+  try {
+    noSleep.enable();
+    console.log("NoSleep enabled - screen will stay awake");
+  } catch (err) {
+    console.warn("NoSleep failed to enable:", err);
   }
 
   // Hide the button after activation
