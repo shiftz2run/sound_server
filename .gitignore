@@ -14,3 +14,9 @@ Thumbs.db
 
 # Trashbin
 trash/
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+assets/soundfiles/
