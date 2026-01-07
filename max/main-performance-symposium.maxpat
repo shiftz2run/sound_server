@@ -4,12 +4,12 @@
         "appversion": {
             "major": 9,
             "minor": 1,
-            "revision": 1,
+            "revision": 2,
             "architecture": "x64",
             "modernui": 1
         },
         "classnamespace": "box",
-        "rect": [ 34.0, 87.0, 987.0, 779.0 ],
+        "rect": [ 34.0, 95.0, 1444.0, 853.0 ],
         "boxes": [
             {
                 "box": {
@@ -1973,7 +1973,7 @@
                     "numoutlets": 1,
                     "outlettype": [ "" ],
                     "patching_rect": [ 494.2661327123642, 1921.0, 70.0, 22.0 ],
-                    "text": "loadmess 1"
+                    "text": "loadmess 0"
                 }
             },
             {
@@ -2137,7 +2137,7 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
@@ -2387,6 +2387,8 @@
                                         "args": [ 8086, "", "../../assets/performer-qr.png", 5000 ],
                                         "autostart": 0,
                                         "defer": 0,
+                                        "node_bin_path": "",
+                                        "npm_bin_path": "",
                                         "watch": 0
                                     },
                                     "text": "node.script qrcodegen.js @args 8086 ../../assets/performer-qr.png 5000",
@@ -2612,7 +2614,7 @@
                     "patching_rect": [ 643.9560754299164, 2101.099003791809, 37.36263918876648, 20.0 ],
                     "presentation": 1,
                     "presentation_rect": [ -569.3333503007889, 150.16667675971985, 37.36263918876648, 20.0 ],
-                    "text": "2"
+                    "text": "1"
                 }
             },
             {
@@ -2827,7 +2829,7 @@
                     "numinlets": 1,
                     "numoutlets": 1,
                     "outlettype": [ "" ],
-                    "patching_rect": [ 670.0000159740448, 1973.1152510643005, 70.0, 22.0 ],
+                    "patching_rect": [ 684.4744700193405, 1967.8779124617577, 70.0, 22.0 ],
                     "text": "loadmess 0"
                 }
             },
@@ -4895,7 +4897,7 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
@@ -6304,7 +6306,7 @@
                     "numoutlets": 1,
                     "outlettype": [ "" ],
                     "patching_rect": [ 893.5483934879303, 2595.1613088846207, 50.0, 22.0 ],
-                    "text": "0"
+                    "text": "1"
                 }
             },
             {
@@ -6559,13 +6561,13 @@
                     "saved_attribute_attributes": {
                         "valueof": {
                             "parameter_longname": "dial",
-                            "parameter_mmax": 1.0,
+                            "parameter_mmax": 10.0,
                             "parameter_modmode": 4,
                             "parameter_shortname": "dial",
                             "parameter_type": 1
                         }
                     },
-                    "size": 2.0,
+                    "size": 11.0,
                     "varname": "dial"
                 }
             },
@@ -7382,7 +7384,7 @@
                     "outlettype": [ "", "int", "", "" ],
                     "parameter_enable": 0,
                     "patching_rect": [ 46.7741938829422, 1853.2258197069168, 269.0, 37.0 ],
-                    "text": "websocket connection available at: http://147.87.42.242:8086"
+                    "text": "websocket connection available at: http://147.87.43.174:8086"
                 }
             },
             {
@@ -7445,7 +7447,7 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
@@ -8045,7 +8047,7 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
@@ -8227,7 +8229,7 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
@@ -8444,7 +8446,7 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
@@ -9038,13 +9040,12 @@
                         "appversion": {
                             "major": 9,
                             "minor": 1,
-                            "revision": 1,
+                            "revision": 2,
                             "architecture": "x64",
                             "modernui": 1
                         },
                         "classnamespace": "box",
                         "rect": [ 59.0, 106.0, 1000.0, 700.0 ],
-                        "visible": 1,
                         "boxes": [
                             {
                                 "box": {
@@ -9211,6 +9212,8 @@
                                         "args": [ 8000, "index.html", "../../assets/public-qr.png", 5000 ],
                                         "autostart": 0,
                                         "defer": 0,
+                                        "node_bin_path": "",
+                                        "npm_bin_path": "",
                                         "watch": 0
                                     },
                                     "text": "node.script qrcodegen.js @args 8000 index.html ../../assets/public-qr.png 5000",
@@ -9488,8 +9491,6 @@
                     "saved_object_attributes": {
                         "autostart": 0,
                         "defer": 0,
-                        "node_bin_path": "",
-                        "npm_bin_path": "",
                         "watch": 1
                     },
                     "text": "node.script sound-server.js @watch 1",
@@ -13228,6 +13229,14 @@
             "obj-88": [ "button[14]", "button[14]", 0 ],
             "obj-90": [ "umenu[2]", "umenu[2]", 0 ],
             "obj-91": [ "umenu[3]", "umenu[3]", 0 ],
+            "parameterbanks": {
+                "0": {
+                    "index": 0,
+                    "name": "",
+                    "parameters": [ "-", "-", "-", "-", "-", "-", "-", "-" ],
+                    "buttons": [ "-", "-", "-", "-", "-", "-", "-", "-" ]
+                }
+            },
             "inherited_shortname": 1
         },
         "autosave": 0,
